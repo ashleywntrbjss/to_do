@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ToDoItem struct {
@@ -13,14 +15,10 @@ type ToDoItem struct {
 	Title string `json:"title"`
 }
 
-func parseTxtFile(fileName string) []byte {
+func parseTxtFile(fileName string) ([]byte, error) {
 	file, err := os.ReadFile(fileName)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return file
+	return file, err
 }
 
 func bytesToToDoItem(bytes []byte) []ToDoItem {
@@ -39,13 +37,32 @@ func printToDoItems(toDoItems []ToDoItem) {
 	}
 }
 
-func main() {
-	fileName := "./part1_13/toDoItemJson.txt"
+func mainMenu() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("To Do - JSON Read and Print")
+	fmt.Println("Please enter a file location: ")
+	input, err := reader.ReadString('\n')
 
-	parsedText := parseTxtFile(fileName)
+	if err != nil {
+		fmt.Println("An error occured while reading input. Please try again", err)
+		return
+	}
+
+	trimmedInput := strings.TrimSpace(input)
+
+	parsedText, parseErr := parseTxtFile(trimmedInput)
+	if parseErr != nil {
+		fmt.Println("The file cannot be located. Please try again", parseErr)
+		return
+	}
 
 	toDoItems := bytesToToDoItem(parsedText)
 
 	printToDoItems(toDoItems)
+}
 
+func main() {
+	for {
+		mainMenu()
+	}
 }
