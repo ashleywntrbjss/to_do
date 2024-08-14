@@ -21,7 +21,7 @@ func marshallToDoItems(args ...ToDoItem) []byte {
 
 func bytesToFile(encodedData []byte) {
 
-	err := os.WriteFile("file.txt", encodedData, 0666)
+	err := os.WriteFile("./file.txt", encodedData, 0666)
 
 	if err != nil {
 		log.Fatal(err)
