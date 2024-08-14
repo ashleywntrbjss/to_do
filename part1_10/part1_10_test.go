@@ -1,6 +1,6 @@
 package part1_10
 
-func ExampleVariadicToDoList(){
+func ExampleVariadicToDoList() {
 	VariadicToDoList("Washing up", "Ironing", "Food shop", "Wash car", "Take out recycling", "Dust the mantle", "Whites wash", "Lights wash", "Dark wash", "Return parcel")
 	// Output: To do:
 	// 1: Washing up
