@@ -11,21 +11,19 @@ type ToDoItem struct {
 	IsComplete bool   `json:"is_complete"`
 }
 
-func printToDoTitle(item ToDoItem, waitGroup *sync.WaitGroup, mutex *sync.Mutex, channel chan bool) {
+func printToDoTitle(item ToDoItem, waitGroup *sync.WaitGroup, mutex *sync.Mutex, nextPairChannel chan struct{}, statusFollowTitleChannel chan struct{}) {
 	defer waitGroup.Done()
+
+	<-nextPairChannel
 	fmt.Println("Item name:", item.Title)
-	channel <- true
+	statusFollowTitleChannel <- struct{}{}
 }
 
-func printToDoStatus(item ToDoItem, waitGroup *sync.WaitGroup, mutex *sync.Mutex, channel chan bool) {
+func printToDoStatus(item ToDoItem, waitGroup *sync.WaitGroup, mutex *sync.Mutex, channel chan struct{}) {
 	defer waitGroup.Done()
 	<-channel
 	fmt.Println("Completion status:", item.IsComplete)
-}
-
-func main() {
-	PrintList()
-
+	close(channel)
 }
 
 func PrintList() {
@@ -34,13 +32,20 @@ func PrintList() {
 	var waitGroup = new(sync.WaitGroup)
 	var mutex = new(sync.Mutex)
 
+	var nextPairChannel = make(chan struct{}, 1)
+
+	nextPairChannel <- struct{}{}
+
 	for _, item := range toDoItems {
-
 		waitGroup.Add(2)
-		var titlePrintedChannel = make(chan bool)
-
-		go printToDoTitle(item, waitGroup, mutex, titlePrintedChannel)
-		go printToDoStatus(item, waitGroup, mutex, titlePrintedChannel)
+		var statusFollowTitleChannel = make(chan struct{})
+		go printToDoTitle(item, waitGroup, mutex, nextPairChannel, statusFollowTitleChannel)
+		go printToDoStatus(item, waitGroup, mutex, statusFollowTitleChannel)
 	}
 	waitGroup.Wait()
+	close(nextPairChannel)
+}
+
+func main() {
+	PrintList()
 }
