@@ -5,32 +5,33 @@ import (
 	"sync"
 )
 
-var number int
-
-var waitGroup = new(sync.WaitGroup)
-
-func updateNumberOdds() {
+func updateNumberOdds(number *int, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-	for i := 1; i < 150; i += 2 {
-		number = i
-		fmt.Println("odds", number)
+	for i := 1; i < 300; i += 2 {
+		*number = i
+		fmt.Println("odds", *number)
 	}
 
 }
 
-func updateNumberEvens() {
+func updateNumberEvens(number *int, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-	for i := 2; i < 150; i += 2 {
-		number = i
-		fmt.Println("evens", number)
+	for i := 2; i < 300; i += 2 {
+		*number = i
+		fmt.Println("evens", *number)
 	}
 
 }
 
 func main() {
 
+	var number *int
+	number = new(int)
+
+	var waitGroup = new(sync.WaitGroup)
+
 	waitGroup.Add(2)
-	go updateNumberOdds()
-	go updateNumberEvens()
+	go updateNumberOdds(number, waitGroup)
+	go updateNumberEvens(number, waitGroup)
 	waitGroup.Wait()
 }
