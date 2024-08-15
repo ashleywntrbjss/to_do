@@ -11,9 +11,8 @@ func updateNumberOdds(number *int) {
 		fmt.Println("odds", *number)
 
 		if *number%2 == 0 {
-			fmt.Println("I found an even", *number)
+			fmt.Println("I found an even when it should be odd", *number)
 		}
-
 	}
 
 }
@@ -26,7 +25,7 @@ func updateNumberEvens(number *int) {
 	}
 
 	if *number%2 == 1 {
-		fmt.Println("I found an odd", *number)
+		fmt.Println("I found an odd when it should be even", *number)
 	}
 
 }
