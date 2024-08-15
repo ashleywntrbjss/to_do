@@ -2,23 +2,31 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
-func updateNumberOdds(number *int, waitGroup *sync.WaitGroup) {
-	defer waitGroup.Done()
-	for i := 1; i < 300; i += 2 {
+func updateNumberOdds(number *int) {
+
+	for i := 1; true; i += 2 {
 		*number = i
 		fmt.Println("odds", *number)
+
+		if *number%2 == 0 {
+			fmt.Println("I found an even", *number)
+		}
+
 	}
 
 }
 
-func updateNumberEvens(number *int, waitGroup *sync.WaitGroup) {
-	defer waitGroup.Done()
-	for i := 2; i < 300; i += 2 {
+func updateNumberEvens(number *int) {
+
+	for i := 2; true; i += 2 {
 		*number = i
 		fmt.Println("evens", *number)
+	}
+
+	if *number%2 == 1 {
+		fmt.Println("I found an odd", *number)
 	}
 
 }
@@ -28,10 +36,9 @@ func main() {
 	var number *int
 	number = new(int)
 
-	var waitGroup = new(sync.WaitGroup)
+	go updateNumberOdds(number)
+	go updateNumberEvens(number)
 
-	waitGroup.Add(2)
-	go updateNumberOdds(number, waitGroup)
-	go updateNumberEvens(number, waitGroup)
-	waitGroup.Wait()
+	for {
+	}
 }
