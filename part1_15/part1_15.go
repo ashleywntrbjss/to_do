@@ -2,35 +2,42 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
-var number int
+func updateNumberOdds(number *int) {
 
-var waitGroup = new(sync.WaitGroup)
+	for i := 1; true; i += 2 {
+		*number = i
+		fmt.Println("odds", *number)
 
-func updateNumberOdds() {
-	defer waitGroup.Done()
-	for i := 1; i < 150; i += 2 {
-		number = i
-		fmt.Println("odds", number)
+		if *number%2 == 0 {
+			fmt.Println("I found an even", *number)
+		}
+
 	}
 
 }
 
-func updateNumberEvens() {
-	defer waitGroup.Done()
-	for i := 2; i < 150; i += 2 {
-		number = i
-		fmt.Println("evens", number)
+func updateNumberEvens(number *int) {
+
+	for i := 2; true; i += 2 {
+		*number = i
+		fmt.Println("evens", *number)
+	}
+
+	if *number%2 == 1 {
+		fmt.Println("I found an odd", *number)
 	}
 
 }
 
 func main() {
 
-	waitGroup.Add(2)
-	go updateNumberOdds()
-	go updateNumberEvens()
-	waitGroup.Wait()
+	var number *int
+	number = new(int)
+
+	go updateNumberOdds(number)
+	go updateNumberEvens(number)
+
+	select {}
 }

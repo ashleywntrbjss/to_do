@@ -39,6 +39,5 @@ func main() {
 	go updateNumberOdds(number)
 	go updateNumberEvens(number)
 
-	for {
-	}
+	select {}
 }
