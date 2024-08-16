@@ -31,7 +31,6 @@ func PrintList() {
 	toDoItems := []ToDoItem{{1, "Washing up", true}, {2, "Ironing", false}, {3, "Food shop", true}, {4, "Wash car", false}, {5, "Buy fish and chips", false}, {6, "Renew car insurance", true}, {7, "Complete Go tasks", true}, {8, "return parcel", false}, {9, "Organise cutlery drawer", true}, {10, "Dust the mantle", true}}
 
 	var waitGroup = new(sync.WaitGroup)
-	var mutex = new(sync.Mutex)
 
 	var nextPairChannel = make(chan struct{}, 1)
 
