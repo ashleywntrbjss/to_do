@@ -1,14 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 var toDoItemRepo []ToDoItem
 
+var repoLock = sync.Mutex{}
+
 func AddItem(item ToDoItem) {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
 	toDoItemRepo = append(toDoItemRepo, item)
 }
 
 func RemoveItemById(itemId int) {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
 	index, isFound := findIndexById(itemId)
 	if !isFound {
 		return
@@ -18,28 +29,41 @@ func RemoveItemById(itemId int) {
 }
 
 func UpdateItemTitleById(itemId int, newTitle string) {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
 	index, isFound := findIndexById(itemId)
 	if !isFound {
 		fmt.Println("Item not found")
 		return
 	}
+
 	toDoItemRepo[index].Title = newTitle
 }
 
 func ToggleItemCompletionStatusById(itemId int) {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
 	index, isFound := findIndexById(itemId)
 	if !isFound {
 		fmt.Println("Item not found")
 		return
 	}
+
 	toDoItemRepo[index].IsComplete = !toDoItemRepo[index].IsComplete
 }
 
 func GetById(itemId int) *ToDoItem {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
 	index, isFound := findIndexById(itemId)
 	if !isFound {
+		repoLock.Unlock()
 		return nil
 	}
+
 	return &toDoItemRepo[index]
 }
 
