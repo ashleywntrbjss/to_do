@@ -19,10 +19,3 @@ func (item *ToDoItem) PrettyPrintToDoItem() {
 	}
 	fmt.Printf("\n%v - %v - [ ]", item.Id, item.Title)
 }
-
-func PrettyPrintToDoItems(items *[]ToDoItem) {
-	for _, item := range *items {
-		item.PrettyPrintToDoItem()
-	}
-	fmt.Println()
-}

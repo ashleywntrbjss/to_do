@@ -12,9 +12,10 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", handleHomePage)
-
 	mux.HandleFunc("/view-all", handleViewAllPage)
+	mux.HandleFunc("/add-new", handleAddNewPage)
+
+	mux.HandleFunc("/", handleHomePage)
 
 	fmt.Println("Starting server at http://localhost:8080")
 	err := http.ListenAndServe("localhost:8080", mux)
@@ -60,5 +61,47 @@ func handleViewAllPage(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println("Error executing template:", err)
 		return
+	}
+}
+
+func handleAddNewPage(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "GET" {
+		fmt.Println("GET", "'/view-all'")
+
+		templatePath := filepath.Join("part2_18_todo_app_web", "addNew.gohtml")
+
+		activeTemplate, err := template.ParseFiles(templatePath)
+		if err != nil {
+			cwd, err := os.Getwd()
+			fmt.Println("Error parsing template:", err)
+			fmt.Println("Current working directory:", cwd)
+			return
+		}
+
+		err = activeTemplate.Execute(writer, GetAll())
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+			return
+		}
+	}
+
+	if request.Method == "POST" {
+		fmt.Println("POST", "'/add-new'")
+
+		err := request.ParseForm()
+		if err != nil {
+			http.Error(writer, "Unable to parse form", http.StatusBadRequest)
+			return
+		}
+
+		title := request.FormValue("title")
+		if title == "" {
+			http.Error(writer, "Title is required", http.StatusBadRequest)
+			return
+		}
+
+		_ = AddItemFromTitle(title)
+
+		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
 	}
 }
