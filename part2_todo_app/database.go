@@ -17,8 +17,22 @@ func RemoveItemById(itemId int) {
 	toDoItemRepo = append(toDoItemRepo[:index], toDoItemRepo[index+1:]...)
 }
 
-func EditItemById(itemId int) {
+func UpdateItemTitleById(itemId int, newTitle string) {
+	index, isFound := findIndexById(itemId)
+	if !isFound {
+		fmt.Println("Item not found")
+		return
+	}
+	toDoItemRepo[index].Title = newTitle
+}
 
+func ToggleItemCompletionStatusById(itemId int) {
+	index, isFound := findIndexById(itemId)
+	if !isFound {
+		fmt.Println("Item not found")
+		return
+	}
+	toDoItemRepo[index].IsComplete = !toDoItemRepo[index].IsComplete
 }
 
 func GetById(itemId int) *ToDoItem {
