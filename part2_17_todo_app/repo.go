@@ -5,20 +5,20 @@ import (
 	"sync"
 )
 
-var toDoItemRepo []ToDoItem
+var toDoItemRepo = []ToDoItem{
+	{Id: 1, Title: "Washing up", IsComplete: true},
+	{Id: 2, Title: "Ironing", IsComplete: false},
+}
 
 var repoLock = sync.Mutex{}
 
 func AddItemFromTitle(title string) {
-	newItem := NewToDoItem(title)
-	addItem(*newItem)
-}
-
-func addItem(item ToDoItem) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	toDoItemRepo = append(toDoItemRepo, item)
+	newItem := NewToDoItem(title)
+	newItem.Id = newIndex()
+	toDoItemRepo = append(toDoItemRepo, *newItem)
 }
 
 func RemoveItemById(itemId int) {
@@ -84,4 +84,8 @@ func findIndexById(id int) (int, bool) {
 	}
 	fmt.Println("Provided item Id not found")
 	return -1, false
+}
+
+func newIndex() int {
+	return len(toDoItemRepo) + 1 // simple ID generation
 }

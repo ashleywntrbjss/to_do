@@ -14,7 +14,7 @@ var reader = bufio.NewReader(os.Stdin)
 
 func menu() {
 
-	printDecoratedTitle("Welcome to the To Do application")
+	printDecoratedTitle("Main menu")
 
 	fmt.Println("Please select an option: ")
 	fmt.Println("1. Create a new To Do item")
@@ -25,7 +25,7 @@ func menu() {
 
 	fmt.Println(ConsoleDecorateLine)
 
-	mainMenuSelection := readAndTrimUserInput("Select a menu item: ")
+	mainMenuSelection := readAndTrimUserInput("Select a menu item")
 
 	handleMainMenuSelection(mainMenuSelection)
 }
@@ -63,7 +63,7 @@ func handleCreateNewItem() {
 	printDecoratedTitle("Create a new To Do item")
 
 	fmt.Println("Please input details for your new To Do item")
-	itemName := readAndTrimUserInput("Item name: ")
+	itemName := readAndTrimUserInput("Item name")
 
 	AddItemFromTitle(itemName)
 
@@ -71,7 +71,7 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	fmt.Println(GetAll())
+	PrettyPrintToDoItems(GetAll())
 }
 
 func handleEditItem() {
@@ -83,6 +83,7 @@ func handleDeleteItem() {
 }
 
 func main() {
+	printDecoratedTitle("Welcome to the To Do application")
 	for {
 		menu()
 	}
