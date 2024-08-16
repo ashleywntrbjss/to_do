@@ -5,7 +5,7 @@ import "testing"
 func TestAddItem(t *testing.T) {
 	toDoItemRepo = []ToDoItem{}
 	item := ToDoItem{Id: 1, Title: "Task 1", IsComplete: false}
-	AddItem(item)
+	addItem(item)
 	if len(toDoItemRepo) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(toDoItemRepo))
 	}

@@ -9,7 +9,12 @@ var toDoItemRepo []ToDoItem
 
 var repoLock = sync.Mutex{}
 
-func AddItem(item ToDoItem) {
+func AddItemFromTitle(title string) {
+	newItem := NewToDoItem(title)
+	addItem(*newItem)
+}
+
+func addItem(item ToDoItem) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 

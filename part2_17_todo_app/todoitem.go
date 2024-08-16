@@ -5,3 +5,7 @@ type ToDoItem struct {
 	Title      string `json:"title"`
 	IsComplete bool   `json:"is_complete"`
 }
+
+func NewToDoItem(title string) *ToDoItem {
+	return &ToDoItem{Title: title, IsComplete: false}
+}
