@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -25,11 +26,26 @@ func menu() {
 		fmt.Println("An error occured while reading input. Please try again", err)
 		return
 	}
+	handleMainMenuSelection(input)
+}
 
-	trimmedInput := strings.TrimSpace(input)
+func handleMainMenuSelection(userInput string) {
+	trimmedInput := strings.TrimSpace(userInput)
 
+	trimmedInputAsInt, err := strconv.Atoi(trimmedInput)
+	if err != nil {
+		fmt.Println("Please enter a number selection", err)
+		return
+	}
+
+	switch {
+	case trimmedInputAsInt == 1:
+
+	}
 }
 
 func Main() {
-
+	for {
+		menu()
+	}
 }
