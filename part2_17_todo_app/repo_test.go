@@ -2,15 +2,19 @@ package main
 
 import "testing"
 
-func TestAddItem(t *testing.T) {
+func TestAddItemFromTitle(t *testing.T) {
 	toDoItemRepo = []ToDoItem{}
-	item := ToDoItem{Id: 1, Title: "Task 1", IsComplete: false}
-	addItem(item)
+	title := "Task 1"
+	item := AddItemFromTitle(title)
+
 	if len(toDoItemRepo) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(toDoItemRepo))
 	}
-	if toDoItemRepo[0] != item {
-		t.Errorf("Expected item %v, got %v", item, toDoItemRepo[0])
+	if toDoItemRepo[0].Title != title {
+		t.Errorf("Expected item title %v, got %v", title, toDoItemRepo[0].Title)
+	}
+	if toDoItemRepo[0].Id != item.Id {
+		t.Errorf("Expected item ID %v, got %v", item.Id, toDoItemRepo[0].Id)
 	}
 }
 
