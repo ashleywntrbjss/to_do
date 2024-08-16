@@ -65,8 +65,10 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	AddItemFromTitle(itemName)
-
+	newItem := AddItemFromTitle(itemName)
+	fmt.Printf("Added your item:")
+	newItem.PrettyPrintToDoItem()
+	fmt.Println()
 }
 
 func handleViewItem() {

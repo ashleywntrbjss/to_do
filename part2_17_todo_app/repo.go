@@ -12,13 +12,15 @@ var toDoItemRepo = []ToDoItem{
 
 var repoLock = sync.Mutex{}
 
-func AddItemFromTitle(title string) {
+func AddItemFromTitle(title string) *ToDoItem {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	newItem := NewToDoItem(title)
 	newItem.Id = newIndex()
 	toDoItemRepo = append(toDoItemRepo, *newItem)
+
+	return newItem
 }
 
 func RemoveItemById(itemId int) {
