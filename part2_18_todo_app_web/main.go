@@ -1,112 +1,38 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
+	"html/template"
+	"log"
+	"net/http"
 )
 
-var ConsoleDecorateLine = "================================"
+func main() {
+	mux := http.NewServeMux()
 
-var reader = bufio.NewReader(os.Stdin)
+	mux.HandleFunc("/", handleHomePage)
 
-func menu() {
-
-	printDecoratedTitle("Main menu")
-
-	fmt.Println("Please select an option: ")
-	fmt.Println("1. Create a new To Do item")
-	fmt.Println("2. View To Do items")
-	fmt.Println("3. Edit a To Do item")
-	fmt.Println("4. Delete a To Do item")
-	fmt.Println("5. Exit application")
-
-	fmt.Println(ConsoleDecorateLine)
-
-	mainMenuSelection := readAndTrimUserInput("Select a menu item")
-
-	handleMainMenuSelection(mainMenuSelection)
+	err := http.ListenAndServe("localhost:8080", mux)
+	if err != nil {
+		log.Fatalln("There's an error with the server:", err)
+	}
 }
 
-func handleMainMenuSelection(userInput string) {
-	userInputAsInt, err := strconv.Atoi(userInput)
-	if err != nil {
-		fmt.Println("Please enter a number selection")
+func handleHomePage(writer http.ResponseWriter, request *http.Request) {
+	if request.URL.Path != "/" {
+
+		http.NotFound(writer, request)
 		return
 	}
+	if request.Method == "GET" {
+		fmt.Println("GET", "Root '/' ")
 
-	switch {
-	case userInputAsInt == 1:
-		handleCreateNewItem()
+		activeTemplate, _ := template.ParseFiles("./views/home.gohtml")
 
-	case userInputAsInt == 2:
-		handleViewItem()
+		err := activeTemplate.Execute(writer, nil)
 
-	case userInputAsInt == 3:
-		handleEditItem()
-
-	case userInputAsInt == 4:
-		handleDeleteItem()
-
-	case userInputAsInt == 5:
-		fmt.Println("Goodbye!")
-		os.Exit(0)
-	default:
-		fmt.Println("Please enter a valid option")
+		if err != nil {
+			return
+		}
 	}
-
-}
-
-func handleCreateNewItem() {
-	printDecoratedTitle("Create a new To Do item")
-
-	fmt.Println("Please input details for your new To Do item")
-	itemName := readAndTrimUserInput("Item name")
-
-	newItem := AddItemFromTitle(itemName)
-	fmt.Printf("Added your item:")
-	newItem.PrettyPrintToDoItem()
-	fmt.Println()
-}
-
-func handleViewItem() {
-	printDecoratedTitle("View To Do items")
-	PrettyPrintToDoItems(GetAll())
-}
-
-func handleEditItem() {
-
-}
-
-func handleDeleteItem() {
-
-}
-
-func main() {
-	printDecoratedTitle("Welcome to the To Do application")
-	for {
-		menu()
-	}
-}
-
-func readAndTrimUserInput(prompt string) string {
-	fmt.Printf("%v: ", prompt)
-	input, err := reader.ReadString('\n')
-
-	if err != nil {
-		fmt.Println("An error occurred while reading input. Please try again")
-		return ""
-	}
-
-	trimmedInput := strings.TrimSpace(input)
-
-	return trimmedInput
-}
-
-func printDecoratedTitle(title string) {
-	fmt.Println(ConsoleDecorateLine)
-	fmt.Println(title)
-	fmt.Println(ConsoleDecorateLine)
 }
