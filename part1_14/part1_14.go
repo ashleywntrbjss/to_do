@@ -8,10 +8,10 @@ func updateNumberOdds(number *int) {
 
 	for i := 1; true; i += 2 {
 		*number = i
-		fmt.Println("odds", *number)
+		fmt.Print("\nOdds - ", *number)
 
 		if *number%2 == 0 {
-			fmt.Println("I found an even", *number)
+			fmt.Print(" - number is now even ", *number)
 		}
 
 	}
@@ -22,10 +22,10 @@ func updateNumberEvens(number *int) {
 
 	for i := 2; true; i += 2 {
 		*number = i
-		fmt.Println("evens", *number)
+		fmt.Print("\nEvens - ", *number)
 
 		if *number%2 == 1 {
-			fmt.Println("I found an odd", *number)
+			fmt.Print(" - number is now odd ", *number)
 		}
 
 	}
@@ -34,7 +34,7 @@ func updateNumberEvens(number *int) {
 
 func main() {
 
-	number := 0
+	var number int
 
 	go updateNumberOdds(&number)
 	go updateNumberEvens(&number)
