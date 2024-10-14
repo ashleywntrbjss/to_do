@@ -19,11 +19,12 @@ func printToDoTitle(item ToDoItem, waitGroup *sync.WaitGroup, nextPairChannel ch
 	statusFollowTitleChannel <- struct{}{}
 }
 
-func printToDoStatus(item ToDoItem, waitGroup *sync.WaitGroup, nextPairChannel chan struct{}, channel chan struct{}) {
+func printToDoStatus(item ToDoItem, waitGroup *sync.WaitGroup, nextPairChannel chan struct{}, statusFollowTitleChannel chan struct{}) {
 	defer waitGroup.Done()
-	<-channel
+	defer close(statusFollowTitleChannel)
+
+	<-statusFollowTitleChannel
 	fmt.Println("Completion status:", item.IsComplete)
-	close(channel)
 	nextPairChannel <- struct{}{}
 }
 
@@ -35,6 +36,7 @@ func PrintList() {
 	var nextPairChannel = make(chan struct{}, 1)
 
 	nextPairChannel <- struct{}{}
+	defer close(nextPairChannel)
 
 	for _, item := range toDoItems {
 		waitGroup.Add(2)
@@ -43,7 +45,6 @@ func PrintList() {
 		go printToDoStatus(item, waitGroup, nextPairChannel, statusFollowTitleChannel)
 	}
 	waitGroup.Wait()
-	close(nextPairChannel)
 }
 
 func main() {
