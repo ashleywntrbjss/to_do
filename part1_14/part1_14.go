@@ -33,11 +33,10 @@ func updateNumberEvens(number *int) {
 
 func main() {
 
-	var number *int
-	number = new(int)
+	number := 0
 
-	go updateNumberOdds(number)
-	go updateNumberEvens(number)
+	go updateNumberOdds(&number)
+	go updateNumberEvens(&number)
 
 	select {}
 }
