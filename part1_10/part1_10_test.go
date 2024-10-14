@@ -1,4 +1,4 @@
-package part1_10
+package main
 
 func ExampleVariadicToDoList() {
 	VariadicToDoList("Washing up", "Ironing", "Food shop", "Wash car", "Take out recycling", "Dust the mantle", "Whites wash", "Lights wash", "Dark wash", "Return parcel")
