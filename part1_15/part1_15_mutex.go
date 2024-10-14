@@ -46,14 +46,13 @@ func main() {
 
 	waitGroup.Add(2)
 
-	var number *int
-	number = new(int)
+	var number int
 
-	go updateNumberOdds(number, waitGroup, mutex)
-	go updateNumberEvens(number, waitGroup, mutex)
+	go updateNumberOdds(&number, waitGroup, mutex)
+	go updateNumberEvens(&number, waitGroup, mutex)
 
 	waitGroup.Wait()
 	fmt.Println("==============================")
-	fmt.Println("Number of Odds: ", clashedOdds)
-	fmt.Println("Number of Evens: ", clashedEvens)
+	fmt.Println("Number of clashed Odds: ", clashedOdds)
+	fmt.Println("Number of clashed Evens: ", clashedEvens)
 }
