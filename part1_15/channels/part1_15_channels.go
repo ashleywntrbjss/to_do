@@ -2,57 +2,65 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
 var numberOfAttempts = 3000000
 
-var clashedOdds, clashedEvens int
+func updateNumberEvens(numberChan chan int) {
+	defer close(numberChan)
 
-func updateNumberOdds(number *int, waitGroup *sync.WaitGroup, mutex *sync.Mutex) {
-	defer waitGroup.Done()
-	for i := 1; i < numberOfAttempts; i += 2 {
-		mutex.Lock()
-		*number = i
-		fmt.Println("odds", *number)
-
-		if *number%2 == 0 {
-			fmt.Println("I found an even when it should be odd", *number)
-			clashedOdds++
-		}
-		mutex.Unlock()
+	for i := 0; i <= numberOfAttempts; i += 2 {
+		numberChan <- i
 	}
 }
 
-func updateNumberEvens(number *int, waitGroup *sync.WaitGroup, mutex *sync.Mutex) {
-	defer waitGroup.Done()
-	for i := 2; i < numberOfAttempts; i += 2 {
-		mutex.Lock()
-		*number = i
-		fmt.Println("evens", *number)
+func updateNumberOdds(numberChan chan int) {
+	defer close(numberChan)
 
-		if *number%2 == 1 {
-			fmt.Println("I found an odd when it should be even", *number)
-			clashedEvens++
-		}
-		mutex.Unlock()
+	for i := 1; i <= numberOfAttempts; i += 2 {
+		numberChan <- i
 	}
 }
 
 func main() {
 
-	var waitGroup = new(sync.WaitGroup)
-	var mutex = new(sync.Mutex)
+	var oddChan = make(chan int)
+	var evenChan = make(chan int)
 
-	waitGroup.Add(2)
+	go updateNumberOdds(oddChan)
+	go updateNumberEvens(evenChan)
 
-	var number int
+	for {
+		select {
+		case number, ok := <-evenChan:
+			if number%2 == 0 {
+				fmt.Println("Even number", number)
+			} else {
+				fmt.Println("Received wrong type of int on the channel")
+			}
+			if !ok {
+				fmt.Println("Even channel closed")
+				evenChan = nil
+			}
 
-	go updateNumberOdds(&number, waitGroup, mutex)
-	go updateNumberEvens(&number, waitGroup, mutex)
+		case number, ok := <-oddChan:
+			if number%2 == 1 {
+				fmt.Println("Odd number", number)
+			} else {
+				fmt.Println("Received wrong type of int on the channel")
+			}
 
-	waitGroup.Wait()
-	fmt.Println("==============================")
-	fmt.Println("Number of clashed Odds: ", clashedOdds)
-	fmt.Println("Number of clashed Evens: ", clashedEvens)
+			if !ok {
+				fmt.Println("Odd channel closed")
+				oddChan = nil
+			}
+		}
+
+		if oddChan == nil && evenChan == nil {
+			fmt.Println("Channels closed")
+			break
+		}
+
+	}
+
 }

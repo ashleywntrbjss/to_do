@@ -11,7 +11,7 @@ var clashedOdds, clashedEvens int
 
 func updateNumberOdds(number *int, waitGroup *sync.WaitGroup, mutex *sync.Mutex) {
 	defer waitGroup.Done()
-	for i := 1; i < numberOfAttempts; i += 2 {
+	for i := 1; i <= numberOfAttempts; i += 2 {
 		mutex.Lock()
 		*number = i
 		fmt.Println("odds", *number)
@@ -26,7 +26,7 @@ func updateNumberOdds(number *int, waitGroup *sync.WaitGroup, mutex *sync.Mutex)
 
 func updateNumberEvens(number *int, waitGroup *sync.WaitGroup, mutex *sync.Mutex) {
 	defer waitGroup.Done()
-	for i := 2; i < numberOfAttempts; i += 2 {
+	for i := 2; i <= numberOfAttempts; i += 2 {
 		mutex.Lock()
 		*number = i
 		fmt.Println("evens", *number)
