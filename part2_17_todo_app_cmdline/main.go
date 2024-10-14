@@ -73,7 +73,7 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	PrettyPrintToDoItems(GetAll())
+	PrettyPrintToDoItems(toDoItemRepo...)
 }
 
 func handleEditItem() {

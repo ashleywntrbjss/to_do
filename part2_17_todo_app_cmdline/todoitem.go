@@ -8,11 +8,11 @@ type ToDoItem struct {
 	IsComplete bool   `json:"is_complete"`
 }
 
-func NewToDoItem(title string) *ToDoItem {
-	return &ToDoItem{Title: title, IsComplete: false}
+func NewToDoItem(title string) ToDoItem {
+	return ToDoItem{Title: title, IsComplete: false}
 }
 
-func (item *ToDoItem) PrettyPrintToDoItem() {
+func (item ToDoItem) PrettyPrintToDoItem() {
 	if item.IsComplete {
 		fmt.Printf("%v - %v - [X]", item.Id, item.Title)
 		return
@@ -20,8 +20,8 @@ func (item *ToDoItem) PrettyPrintToDoItem() {
 	fmt.Printf("\n%v - %v - [ ]", item.Id, item.Title)
 }
 
-func PrettyPrintToDoItems(items *[]ToDoItem) {
-	for _, item := range *items {
+func PrettyPrintToDoItems(item ...ToDoItem) {
+	for _, item := range item {
 		item.PrettyPrintToDoItem()
 	}
 	fmt.Println()
