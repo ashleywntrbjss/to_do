@@ -23,10 +23,11 @@ func updateNumberEvens(number *int) {
 	for i := 2; true; i += 2 {
 		*number = i
 		fmt.Println("evens", *number)
-	}
 
-	if *number%2 == 1 {
-		fmt.Println("I found an odd", *number)
+		if *number%2 == 1 {
+			fmt.Println("I found an odd", *number)
+		}
+
 	}
 
 }
