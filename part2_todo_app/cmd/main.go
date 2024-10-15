@@ -40,28 +40,24 @@ func menu() {
 }
 
 func handleMainMenuSelection(userInput string) {
-	userInputAsInt, err := strconv.Atoi(userInput)
-	if err != nil {
-		fmt.Println("Please enter a number selection")
-		return
-	}
 
-	switch {
-	case userInputAsInt == 1:
+	switch userInput {
+	case "1":
 		handleCreateNewItem()
 
-	case userInputAsInt == 2:
+	case "2":
 		handleViewItem()
 
-	case userInputAsInt == 3:
+	case "3":
 		handleEditItem()
 
-	case userInputAsInt == 4:
+	case "4":
 		handleDeleteItem()
 
-	case userInputAsInt == 5:
+	case "5":
 		fmt.Println("Goodbye!")
 		os.Exit(0)
+
 	default:
 		fmt.Println("Please enter a valid option")
 	}
@@ -90,6 +86,52 @@ func handleViewItem() {
 }
 
 func handleEditItem() {
+	printDecoratedTitle("Edit To Do items")
+	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
+
+	userInput := readAndTrimUserInput("Provide the Id of the item to edit")
+
+	userInputAsInt, err := strconv.Atoi(userInput)
+	if err != nil {
+		fmt.Println("Please enter a number selection")
+		return
+	}
+
+	activeItem, err := repo.GetById(userInputAsInt)
+
+	if err != nil {
+		fmt.Println("Unable to retrieve item from repo", err)
+		return
+	}
+
+	fmt.Println("Selected To Do Item: ")
+	activeItem.PrettyPrintToDoItem()
+
+	var markUnmarkPrompt string
+
+	markAsCompletePrompt := "1. Mark as complete"
+	markAsIncompletePrompt := "2. Mark as incomplete"
+
+	if activeItem.IsComplete {
+		markUnmarkPrompt = markAsCompletePrompt
+	} else {
+		markUnmarkPrompt = markAsIncompletePrompt
+	}
+
+	fmt.Println(markUnmarkPrompt)
+	fmt.Println("2. Update title")
+
+	editOption := readAndTrimUserInput("Select an edit option: ")
+
+	switch editOption {
+	case "1":
+		break
+	case "2":
+		break
+	default:
+		fmt.Println("Please enter a valid option")
+
+	}
 
 }
 
