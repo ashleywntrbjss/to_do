@@ -30,8 +30,7 @@ func menu() {
 	fmt.Println("1. Create a new To Do item")
 	fmt.Println("2. View To Do items")
 	fmt.Println("3. Edit a To Do item")
-	fmt.Println("4. Delete a To Do item")
-	fmt.Println("5. Exit application")
+	fmt.Println("4. Exit application")
 
 	fmt.Println(ConsoleDecorateLine)
 
@@ -53,9 +52,6 @@ func handleMainMenuSelection(userInput string) {
 		handleEditItem()
 
 	case "4":
-		handleDeleteItem()
-
-	case "5":
 		fmt.Println("Goodbye!")
 		os.Exit(0)
 
@@ -106,10 +102,13 @@ func handleEditItem() {
 		return
 	}
 
-	fmt.Println(ConsoleDecorateLine)
+	handleSelectedItem(activeItem)
+
+}
+
+func handleSelectedItem(activeItem todoitem.ToDoItem) {
 	fmt.Println("Selected To Do Item: ")
 	activeItem.PrettyPrintToDoItem()
-	fmt.Println(ConsoleDecorateLine)
 
 	var markUnmarkPrompt string
 
@@ -134,7 +133,8 @@ func handleEditItem() {
 	case "1":
 		repo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
 	case "2":
-		newTitle := readAndTrimUserInput("Provide new title for to do item")
+		prompt := "Provide new title for item: '" + activeItem.Title + "'"
+		newTitle := readAndTrimUserInput(prompt)
 		repo.UpdateItemTitleById(newTitle, activeItem.Id)
 	case "3":
 		return
@@ -144,12 +144,11 @@ func handleEditItem() {
 	}
 
 	fmt.Println("Updated item: ")
-	activeItem, err = repo.GetById(activeItem.Id)
+	activeItem, err := repo.GetById(activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
 	}
 	activeItem.PrettyPrintToDoItem()
-
 }
 
 func handleDeleteItem() {
