@@ -106,8 +106,10 @@ func handleEditItem() {
 		return
 	}
 
+	fmt.Println(ConsoleDecorateLine)
 	fmt.Println("Selected To Do Item: ")
 	activeItem.PrettyPrintToDoItem()
+	fmt.Println(ConsoleDecorateLine)
 
 	var markUnmarkPrompt string
 
@@ -120,9 +122,11 @@ func handleEditItem() {
 		markUnmarkPrompt = markAsCompletePrompt
 	}
 
+	fmt.Println(ConsoleDecorateLine)
 	fmt.Println(markUnmarkPrompt)
 	fmt.Println("2. Update title")
 	fmt.Println("3. Exit to main menu")
+	fmt.Println(ConsoleDecorateLine)
 
 	editOption := readAndTrimUserInput("Select an edit option: ")
 
