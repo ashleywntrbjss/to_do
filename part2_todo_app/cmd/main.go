@@ -14,6 +14,13 @@ var ConsoleDecorateLine = "================================"
 
 var reader = bufio.NewReader(os.Stdin)
 
+func main() {
+	printDecoratedTitle("Welcome to the To Do application")
+	for {
+		menu()
+	}
+}
+
 func menu() {
 
 	printDecoratedTitle("Main menu")
@@ -84,13 +91,6 @@ func handleEditItem() {
 
 func handleDeleteItem() {
 
-}
-
-func main() {
-	printDecoratedTitle("Welcome to the To Do application")
-	for {
-		menu()
-	}
 }
 
 func readAndTrimUserInput(prompt string) string {
