@@ -75,7 +75,7 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	todoitem.PrettyPrintToDoItems(repo.toDoItemRepo...)
+	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
 }
 
 func handleEditItem() {

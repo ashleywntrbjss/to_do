@@ -69,7 +69,6 @@ func GetById(itemId int) (todoitem.ToDoItem, error) {
 
 	index, isFound := findIndexById(itemId)
 	if !isFound {
-		repoLock.Unlock()
 		return todoitem.ToDoItem{}, errors.New("cannot find item by provided id")
 	}
 
@@ -84,6 +83,10 @@ func findIndexById(id int) (int, bool) {
 	}
 	fmt.Println("Provided item Id not found")
 	return -1, false
+}
+
+func GetAll() []todoitem.ToDoItem {
+	return toDoItemRepo
 }
 
 func newIndex() int {
