@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/repo"
-	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/todoitem"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
 	"fmt"
 	"os"

@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/todoitem"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"errors"
 	"fmt"
 	"sync"
