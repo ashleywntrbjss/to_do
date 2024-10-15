@@ -1,23 +1,24 @@
-package main
+package repo
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/todoitem"
 	"errors"
 	"fmt"
 	"sync"
 )
 
-var toDoItemRepo = []ToDoItem{
+var toDoItemRepo = []todoitem.ToDoItem{
 	{Id: 1, Title: "Washing up", IsComplete: true},
 	{Id: 2, Title: "Ironing", IsComplete: false},
 }
 
 var repoLock = sync.Mutex{}
 
-func AddItemFromTitle(title string) ToDoItem {
+func AddItemFromTitle(title string) todoitem.ToDoItem {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	newItem := NewToDoItem(title)
+	newItem := todoitem.NewToDoItem(title)
 	newItem.Id = newIndex()
 	toDoItemRepo = append(toDoItemRepo, newItem)
 
@@ -62,14 +63,14 @@ func ToggleItemCompletionStatusById(itemId int) {
 	toDoItemRepo[index].IsComplete = !toDoItemRepo[index].IsComplete
 }
 
-func GetById(itemId int) (ToDoItem, error) {
+func GetById(itemId int) (todoitem.ToDoItem, error) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	index, isFound := findIndexById(itemId)
 	if !isFound {
 		repoLock.Unlock()
-		return ToDoItem{}, errors.New("cannot find item by provided id")
+		return todoitem.ToDoItem{}, errors.New("cannot find item by provided id")
 	}
 
 	return toDoItemRepo[index], nil

@@ -1,9 +1,12 @@
-package main
+package repo
 
-import "testing"
+import (
+	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/todoitem"
+	"testing"
+)
 
 func TestAddItemFromTitle(t *testing.T) {
-	toDoItemRepo = []ToDoItem{}
+	toDoItemRepo = []todoitem.ToDoItem{}
 	title := "Task 1"
 	item := AddItemFromTitle(title)
 
@@ -19,7 +22,7 @@ func TestAddItemFromTitle(t *testing.T) {
 }
 
 func TestRemoveItemById(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
@@ -33,7 +36,7 @@ func TestRemoveItemById(t *testing.T) {
 }
 
 func TestUpdateItemTitleById(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
@@ -44,7 +47,7 @@ func TestUpdateItemTitleById(t *testing.T) {
 }
 
 func TestToggleCompletionById(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
@@ -59,7 +62,7 @@ func TestToggleCompletionById(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
@@ -70,7 +73,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
@@ -81,7 +84,7 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestFindIndexById(t *testing.T) {
-	toDoItemRepo = []ToDoItem{
+	toDoItemRepo = []todoitem.ToDoItem{
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}

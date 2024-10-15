@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/repo"
+	"bjss.com/ashley.winter/to_do/part2_17_todo_app_cmdline/todoitem"
 	"bufio"
 	"fmt"
 	"os"
@@ -65,7 +67,7 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem := AddItemFromTitle(itemName)
+	newItem := repo.AddItemFromTitle(itemName)
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
 	fmt.Println()
@@ -73,7 +75,7 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	PrettyPrintToDoItems(toDoItemRepo...)
+	todoitem.PrettyPrintToDoItems(repo.toDoItemRepo...)
 }
 
 func handleEditItem() {
