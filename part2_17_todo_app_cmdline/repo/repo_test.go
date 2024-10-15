@@ -66,8 +66,14 @@ func TestGetById(t *testing.T) {
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
-	item := GetById(2)
-	if item == nil || item.Id != 2 {
+
+	item, err := GetById(2)
+
+	if err != nil {
+		t.Fatalf("Should not receive error")
+	}
+
+	if item.Id != 2 && item.Title != "Task 2" && item.IsComplete {
 		t.Errorf("Expected item with ID 2, got %v", item)
 	}
 }
@@ -78,8 +84,8 @@ func TestGetAll(t *testing.T) {
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
 	items := GetAll()
-	if len(*items) != 2 {
-		t.Errorf("Expected 2 items, got %d", len(*items))
+	if len(items) != 2 {
+		t.Errorf("Expected 2 items, got %d", len(items))
 	}
 }
 
