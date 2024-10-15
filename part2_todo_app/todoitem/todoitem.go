@@ -13,16 +13,20 @@ func NewToDoItem(title string) ToDoItem {
 }
 
 func (item ToDoItem) PrettyPrintToDoItem() {
+
+	var completionIndicator string
+
 	if item.IsComplete {
-		fmt.Printf("%v - %v - [X]", item.Id, item.Title)
-		return
+		completionIndicator = "[X]"
+	} else {
+		completionIndicator = "[ ]"
 	}
-	fmt.Printf("\n%v - %v - [ ]", item.Id, item.Title)
+
+	fmt.Println(item.Id, "-", item.Title, "-", completionIndicator)
 }
 
 func PrettyPrintToDoItems(item ...ToDoItem) {
 	for _, item := range item {
 		item.PrettyPrintToDoItem()
 	}
-	fmt.Println()
 }

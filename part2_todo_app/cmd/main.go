@@ -115,9 +115,9 @@ func handleEditItem() {
 	markAsIncompletePrompt := "1. Mark as incomplete"
 
 	if activeItem.IsComplete {
-		markUnmarkPrompt = markAsCompletePrompt
-	} else {
 		markUnmarkPrompt = markAsIncompletePrompt
+	} else {
+		markUnmarkPrompt = markAsCompletePrompt
 	}
 
 	fmt.Println(markUnmarkPrompt)
@@ -139,6 +139,7 @@ func handleEditItem() {
 
 	}
 
+	fmt.Println("Updated item: ")
 	activeItem, err = repo.GetById(activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
