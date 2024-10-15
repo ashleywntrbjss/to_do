@@ -5,6 +5,7 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -87,6 +88,7 @@ func handleViewItem() {
 
 func handleEditItem() {
 	printDecoratedTitle("Edit To Do items")
+
 	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
 
 	userInput := readAndTrimUserInput("Provide the Id of the item to edit")
@@ -110,7 +112,7 @@ func handleEditItem() {
 	var markUnmarkPrompt string
 
 	markAsCompletePrompt := "1. Mark as complete"
-	markAsIncompletePrompt := "2. Mark as incomplete"
+	markAsIncompletePrompt := "1. Mark as incomplete"
 
 	if activeItem.IsComplete {
 		markUnmarkPrompt = markAsCompletePrompt
@@ -120,18 +122,28 @@ func handleEditItem() {
 
 	fmt.Println(markUnmarkPrompt)
 	fmt.Println("2. Update title")
+	fmt.Println("3. Exit to main menu")
 
 	editOption := readAndTrimUserInput("Select an edit option: ")
 
 	switch editOption {
 	case "1":
-		break
+		repo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
 	case "2":
-		break
+		newTitle := readAndTrimUserInput("Provide new title for to do item")
+		repo.UpdateItemTitleById(newTitle, activeItem.Id)
+	case "3":
+		return
 	default:
 		fmt.Println("Please enter a valid option")
 
 	}
+
+	activeItem, err = repo.GetById(activeItem.Id)
+	if err != nil {
+		log.Fatal("Unable to retrieve recently updated item", err)
+	}
+	activeItem.PrettyPrintToDoItem()
 
 }
 

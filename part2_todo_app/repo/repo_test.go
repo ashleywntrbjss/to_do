@@ -40,7 +40,7 @@ func TestUpdateItemTitleById(t *testing.T) {
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
-	UpdateItemTitleById(2, "Updated Task 2")
+	UpdateItemTitleById("Updated Task 2", 2)
 	if toDoItemRepo[1].Title != "Updated Task 2" {
 		t.Errorf("Expected title 'Updated Task 2', got %s", toDoItemRepo[1].Title)
 	}

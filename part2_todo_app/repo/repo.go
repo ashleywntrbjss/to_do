@@ -44,7 +44,7 @@ func GetAll() []todoitem.ToDoItem {
 	return toDoItemRepo
 }
 
-func UpdateItemTitleById(itemId int, newTitle string) {
+func UpdateItemTitleById(newTitle string, itemId int) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
