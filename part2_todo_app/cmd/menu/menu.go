@@ -11,12 +11,15 @@ type Option struct {
 }
 
 type Menu struct {
+	Title   string
 	Options []Option
 }
 
 const ConsoleDecorateLine = "================================"
 
 func (menu *Menu) PrintMenuItems() {
+	fmt.Println(ConsoleDecorateLine)
+	fmt.Println(menu.Title)
 	fmt.Println(ConsoleDecorateLine)
 	for index, option := range menu.Options {
 		fmt.Println(index, "-", option.Title)

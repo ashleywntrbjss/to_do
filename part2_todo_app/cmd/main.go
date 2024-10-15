@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/cmd/menu"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
@@ -18,45 +19,56 @@ var reader = bufio.NewReader(os.Stdin)
 func main() {
 	printDecoratedTitle("Welcome to the To Do application")
 	for {
-		menu()
+		runMainMenu()
 	}
 }
 
-func menu() {
+func runMainMenu() {
 
-	printDecoratedTitle("Main menu")
+	mainMenu := menu.Menu{
+		Title: "Main menu",
+		Options: []menu.Option{
+			{Key: "create", Title: "Create a new To Do item"},
+			{Key: "viewAll", Title: "View all To Do items"},
+			{Key: "edit", Title: "Edit a To Do item"},
+			{Key: "exit", Title: "Exit To Do app"},
+		},
+	}
 
-	fmt.Println("Please select an option: ")
-	fmt.Println("1. Create a new To Do item")
-	fmt.Println("2. View To Do items")
-	fmt.Println("3. Edit a To Do item")
-	fmt.Println("4. Exit application")
-
-	fmt.Println(ConsoleDecorateLine)
+	mainMenu.PrintMenuItems()
 
 	mainMenuSelection := readAndTrimUserInput("Select a menu item")
 
-	handleMainMenuSelection(mainMenuSelection)
-}
+	selectionAsInt, err := strconv.Atoi(mainMenuSelection)
 
-func handleMainMenuSelection(userInput string) {
+	if err != nil {
+		fmt.Println("Please make a valid selection")
+		return
+	}
 
-	switch userInput {
-	case "1":
+	selectionKey, err := mainMenu.MakeMenuSelection(selectionAsInt)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	switch selectionKey {
+	case "create":
 		handleCreateNewItem()
 
-	case "2":
+	case "viewAll":
 		handleViewItem()
 
-	case "3":
+	case "edit":
 		handleEditItem()
 
-	case "4":
+	case "exit":
 		fmt.Println("Goodbye!")
 		os.Exit(0)
 
 	default:
-		fmt.Println("Please enter a valid option")
+		fmt.Println("Please select a valid option")
 	}
 
 }
