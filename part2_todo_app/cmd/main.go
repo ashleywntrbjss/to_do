@@ -75,14 +75,18 @@ func handleCreateNewItem() {
 	itemName := readAndTrimUserInput("Item name")
 
 	newItem := repo.CreateItemFromTitle(itemName)
+
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
 	fmt.Println()
+
+	pauseForInput()
 }
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
 	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
+	pauseForInput()
 }
 
 func handleEditItem() {
@@ -105,6 +109,11 @@ func readAndTrimUserInput(prompt string) string {
 	trimmedInput := strings.TrimSpace(input)
 
 	return trimmedInput
+}
+
+func pauseForInput() {
+	fmt.Println("Press enter to continue...")
+	_, _ = reader.ReadByte()
 }
 
 func printDecoratedTitle(title string) {
