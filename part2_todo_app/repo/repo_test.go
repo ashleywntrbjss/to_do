@@ -8,7 +8,7 @@ import (
 func TestAddItemFromTitle(t *testing.T) {
 	toDoItemRepo = []todoitem.ToDoItem{}
 	title := "Task 1"
-	item := AddItemFromTitle(title)
+	item := CreateItemFromTitle(title)
 
 	if len(toDoItemRepo) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(toDoItemRepo))
@@ -26,7 +26,7 @@ func TestRemoveItemById(t *testing.T) {
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
-	RemoveItemById(2)
+	DeleteItemById(2)
 	if len(toDoItemRepo) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(toDoItemRepo))
 	}
@@ -51,11 +51,11 @@ func TestToggleCompletionById(t *testing.T) {
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
-	ToggleItemCompletionStatusById(2)
+	UpdateItemCompletionStatusById(2)
 	if !toDoItemRepo[1].IsComplete {
 		t.Errorf("Expected IsComplete to be true, got %v", toDoItemRepo[1].IsComplete)
 	}
-	ToggleItemCompletionStatusById(2)
+	UpdateItemCompletionStatusById(2)
 	if toDoItemRepo[1].IsComplete {
 		t.Errorf("Expected IsComplete to be false, got %v", toDoItemRepo[1].IsComplete)
 	}

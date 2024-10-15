@@ -67,7 +67,7 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem := repo.AddItemFromTitle(itemName)
+	newItem := repo.CreateItemFromTitle(itemName)
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
 	fmt.Println()
