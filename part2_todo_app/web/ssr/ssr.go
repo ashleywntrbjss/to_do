@@ -39,7 +39,7 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 			panic(getWdErr)
 		}
 
-		return template.Template{}, errors.New("Error parsing template" + err.Error() + ". Current working directory:" + cwd)
+		return template.Template{}, errors.New("Error parsing template " + err.Error() + ". Current working directory:" + cwd)
 	}
 
 	return *activeTemplate, nil
