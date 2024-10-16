@@ -38,16 +38,13 @@ func runMainMenu() {
 	mainMenu.PrintMenuItems()
 
 	mainMenuSelection := readAndTrimUserInput("Select a menu item")
-
 	selectionAsInt, err := strconv.Atoi(mainMenuSelection)
-
 	if err != nil {
 		fmt.Println("Please make a valid selection")
 		return
 	}
 
 	selectionKey, err := mainMenu.MakeMenuSelection(selectionAsInt)
-
 	if err != nil {
 		fmt.Println(err)
 		return
