@@ -3,6 +3,7 @@ package menu
 import (
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 type Option struct {
@@ -27,7 +28,16 @@ func (menu *Menu) PrintMenuItems() {
 	fmt.Println(ConsoleDecorateLine)
 }
 
-func (menu *Menu) MakeMenuSelection(selectionIndex int) (string, error) {
+func (menu *Menu) ParseMenuSelectionString(selectionInput string) (string, error) {
+	selectionAsInt, err := strconv.Atoi(selectionInput)
+	if err != nil {
+		return "", errors.New("input not a valid integer selection")
+	}
+
+	return menu.ParseMenuSelection(selectionAsInt)
+}
+
+func (menu *Menu) ParseMenuSelection(selectionIndex int) (string, error) {
 	if len(menu.Options) < selectionIndex {
 		return "", errors.New("selected index out of bounds")
 	}

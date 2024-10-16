@@ -38,13 +38,8 @@ func runMainMenu() {
 	mainMenu.PrintMenuItems()
 
 	mainMenuSelection := readAndTrimUserInput("Select a menu item")
-	selectionAsInt, err := strconv.Atoi(mainMenuSelection)
-	if err != nil {
-		fmt.Println("Please make a valid selection")
-		return
-	}
 
-	selectionKey, err := mainMenu.MakeMenuSelection(selectionAsInt)
+	selectionKey, err := mainMenu.ParseMenuSelectionString(mainMenuSelection)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -121,8 +116,8 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	var markUnmarkPrompt string
 
-	markAsCompletePrompt := "1. Mark as complete"
-	markAsIncompletePrompt := "1. Mark as incomplete"
+	markAsCompletePrompt := "Mark as complete"
+	markAsIncompletePrompt := "Mark as incomplete"
 
 	if activeItem.IsComplete {
 		markUnmarkPrompt = markAsIncompletePrompt
@@ -130,33 +125,57 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 		markUnmarkPrompt = markAsCompletePrompt
 	}
 
-	fmt.Println(ConsoleDecorateLine)
-	fmt.Println(markUnmarkPrompt)
-	fmt.Println("2. Update title")
-	fmt.Println("3. Exit to main menu")
-	fmt.Println(ConsoleDecorateLine)
+	editMenu := menu.Menu{
+		Title: "Edit To Do item menu",
+		Options: []menu.Option{
+			{Key: "markCompletionStatus", Title: markUnmarkPrompt},
+			{Key: "updateTitle", Title: "Update title"},
+			{Key: "deleteItem", Title: "Delete To Do item"},
+			{Key: "exit", Title: "Exit to main menu"},
+		},
+	}
 
-	editOption := readAndTrimUserInput("Select an edit option: ")
+	editMenu.PrintMenuItems()
+	editSelection := readAndTrimUserInput("Select an edit option: ")
 
-	switch editOption {
-	case "1":
+	editSelectionKey, err := editMenu.ParseMenuSelectionString(editSelection)
+	if err != nil {
+		fmt.Println("Error when handling selection", err)
+		return
+	}
+
+	switch editSelectionKey {
+	case "markCompletionStatus":
 		repo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
-	case "2":
+	case "updateTitle":
 		prompt := "Provide new title for item: '" + activeItem.Title + "'"
 		newTitle := readAndTrimUserInput(prompt)
 		repo.UpdateItemTitleById(newTitle, activeItem.Id)
-	case "3":
+	case "deleteItem":
+		prompt := "Are you sure you wish to delete: '" + activeItem.Title + "'? (yes/no)"
+		decision := readAndTrimUserInput(prompt)
+
+		if decision == "yes" {
+			repo.DeleteItemById(activeItem.Id)
+			fmt.Println("To Do item deleted")
+			return // skip printing logic for deleted item
+		}
+		fmt.Println("To Do item not deleted")
+		return
+	case "exit":
 		return
 	default:
 		fmt.Println("Please enter a valid option")
-
+		return
 	}
 
 	fmt.Println("Updated item: ")
-	activeItem, err := repo.GetById(activeItem.Id)
+
+	activeItem, err = repo.GetById(activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
 	}
+
 	activeItem.PrettyPrintToDoItem()
 }
 
