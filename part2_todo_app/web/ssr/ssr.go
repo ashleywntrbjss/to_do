@@ -2,6 +2,7 @@ package ssr
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -13,8 +14,8 @@ import (
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/view-all", handleViewAllPage)
-	mux.HandleFunc("/add-new", handleAddNewPage)
+	mux.HandleFunc("/view-all", handleViewAllToDoItemsPage)
+	mux.HandleFunc("/add-new", handleAddNewToDoItemPage)
 
 	mux.HandleFunc("/", handleHomePage)
 
@@ -25,16 +26,31 @@ func ListenAndServe() {
 	}
 }
 
-func handleHomePage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("GET", "Root '/' ")
+func getTemplateByFilename(filename string) (template.Template, error) {
+	baseFilepath := filepath.Join("part2_todo_app", "web", "ssr", "templates")
 
-	templatePath := filepath.Join("part2_18_todo_app_web", "home.gohtml")
+	templatePath := filepath.Join(baseFilepath, filename)
 
 	activeTemplate, err := template.ParseFiles(templatePath)
 	if err != nil {
-		cwd, err := os.Getwd()
-		fmt.Println("Error parsing template:", err)
-		fmt.Println("Current working directory:", cwd)
+		// include the current working directory to provide context
+		cwd, getWdErr := os.Getwd()
+		if getWdErr != nil {
+			panic(getWdErr)
+		}
+
+		return template.Template{}, errors.New("Error parsing template" + err.Error() + ". Current working directory:" + cwd)
+	}
+
+	return *activeTemplate, nil
+}
+
+func handleHomePage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("GET", "Root '/' ")
+
+	activeTemplate, err := getTemplateByFilename("home.gohtml")
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -45,16 +61,12 @@ func handleHomePage(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func handleViewAllPage(writer http.ResponseWriter, request *http.Request) {
+func handleViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println("GET", "'/view-all'")
 
-	templatePath := filepath.Join("part2_18_todo_app_web", "viewAll.gohtml")
-
-	activeTemplate, err := template.ParseFiles(templatePath)
+	activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
 	if err != nil {
-		cwd, err := os.Getwd()
-		fmt.Println("Error parsing template:", err)
-		fmt.Println("Current working directory:", cwd)
+		fmt.Println(err)
 		return
 	}
 
@@ -65,17 +77,13 @@ func handleViewAllPage(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func handleAddNewPage(writer http.ResponseWriter, request *http.Request) {
+func handleAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == "GET" {
 		fmt.Println("GET", "'/view-all'")
 
-		templatePath := filepath.Join("part2_18_todo_app_web", "addNew.gohtml")
-
-		activeTemplate, err := template.ParseFiles(templatePath)
+		activeTemplate, err := getTemplateByFilename("addNew.gohtml")
 		if err != nil {
-			cwd, err := os.Getwd()
-			fmt.Println("Error parsing template:", err)
-			fmt.Println("Current working directory:", cwd)
+			fmt.Println(err)
 			return
 		}
 
@@ -104,5 +112,14 @@ func handleAddNewPage(writer http.ResponseWriter, request *http.Request) {
 		_ = repo.CreateItemFromTitle(title)
 
 		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
+	}
+}
+
+func handleEditPage(writer http.ResponseWriter, request *http.Request) {
+	if request.Method == "GET" {
+
+	}
+	if request.Method == "PUT" {
+
 	}
 }
