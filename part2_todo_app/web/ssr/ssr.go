@@ -30,6 +30,16 @@ func ListenAndServe() {
 	}
 }
 
+func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any) {
+
+	activeTemplate, err := getTemplateByFilename(filename)
+	if err != nil {
+		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+	}
+
+	executeTemplate(activeTemplate, writer, data)
+}
+
 func getTemplateByFilename(filename string) (template.Template, error) {
 	baseFilepath := filepath.Join("part2_todo_app", "web", "ssr", "templates")
 
@@ -49,58 +59,36 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 	return *activeTemplate, nil
 }
 
+func executeTemplate(template template.Template, writer http.ResponseWriter, data any) {
+	err := template.Execute(writer, data)
+
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		return
+	}
+}
+
 func handleGETHomePage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "Root '/' ")
 
-	if request.Method == "GET" {
-		activeTemplate, err := getTemplateByFilename("home.gohtml")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = activeTemplate.Execute(writer, nil)
-		if err != nil {
-			fmt.Println("Error executing template:", err)
-			return
-		}
-	}
+	getTemplateAndExecute("home.gohtml", writer, nil)
 }
 
 func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/view-all'")
 
-	activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	err = activeTemplate.Execute(writer, repo.GetAll())
-	if err != nil {
-		fmt.Println("Error executing template:", err)
-		return
-	}
-
+	getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
 }
 
 func handleGETAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/view-all'")
-	activeTemplate, err := getTemplateByFilename("addNew.gohtml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	fmt.Println(request.Method, "'/add-new'")
 
-	err = activeTemplate.Execute(writer, repo.GetAll())
-	if err != nil {
-		fmt.Println("Error executing template:", err)
-		return
-	}
+	getTemplateAndExecute("addNew.gohtml", writer, nil)
 }
 
 func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/view-all'")
+	fmt.Println(request.Method, "'/add-new'")
 
 	err := request.ParseForm()
 	if err != nil {
