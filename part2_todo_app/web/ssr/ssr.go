@@ -16,7 +16,9 @@ func ListenAndServe() {
 
 	mux.HandleFunc("/view-all", handleViewAllToDoItemsPage)
 	mux.HandleFunc("/add-new", handleAddNewToDoItemPage)
+	mux.HandleFunc("/edit", handleEditToDoItemPage)
 
+	mux.HandleFunc("/favicon.ico", handleFavicon)
 	mux.HandleFunc("/", handleHomePage)
 
 	fmt.Println("Starting server at http://localhost:8080")
@@ -46,41 +48,44 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 }
 
 func handleHomePage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("GET", "Root '/' ")
+	fmt.Println(request.Method, "Root '/' ")
 
-	activeTemplate, err := getTemplateByFilename("home.gohtml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	if request.Method == "GET" {
+		activeTemplate, err := getTemplateByFilename("home.gohtml")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	err = activeTemplate.Execute(writer, nil)
-	if err != nil {
-		fmt.Println("Error executing template:", err)
-		return
+		err = activeTemplate.Execute(writer, nil)
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+			return
+		}
 	}
 }
 
 func handleViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("GET", "'/view-all'")
+	fmt.Println(request.Method, "'/view-all'")
+	if request.Method == "GET" {
 
-	activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+		activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
-	err = activeTemplate.Execute(writer, repo.GetAll())
-	if err != nil {
-		fmt.Println("Error executing template:", err)
-		return
+		err = activeTemplate.Execute(writer, repo.GetAll())
+		if err != nil {
+			fmt.Println("Error executing template:", err)
+			return
+		}
 	}
 }
 
 func handleAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/view-all'")
 	if request.Method == "GET" {
-		fmt.Println("GET", "'/view-all'")
-
 		activeTemplate, err := getTemplateByFilename("addNew.gohtml")
 		if err != nil {
 			fmt.Println(err)
@@ -95,8 +100,6 @@ func handleAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request)
 	}
 
 	if request.Method == "POST" {
-		fmt.Println("POST", "'/add-new'")
-
 		err := request.ParseForm()
 		if err != nil {
 			http.Error(writer, "Unable to parse form", http.StatusBadRequest)
@@ -115,11 +118,16 @@ func handleAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request)
 	}
 }
 
-func handleEditPage(writer http.ResponseWriter, request *http.Request) {
+func handleEditToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/edit'")
 	if request.Method == "GET" {
 
 	}
 	if request.Method == "PUT" {
 
 	}
+}
+
+func handleFavicon(writer http.ResponseWriter, request *http.Request) {
+	return
 }
