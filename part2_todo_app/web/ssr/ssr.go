@@ -120,7 +120,7 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 
 	activeItem, err := repo.GetById(activeIdAsInt)
 	if err != nil {
-		http.Error(writer, "Itemid not found", http.StatusNotFound)
+		http.Error(writer, "ItemId not found", http.StatusNotFound)
 		return
 	}
 
