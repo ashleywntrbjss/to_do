@@ -115,11 +115,13 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 
 	if err != nil {
 		http.Error(writer, "Invalid itemId format", http.StatusBadRequest)
+		return
 	}
 
 	activeItem, err := repo.GetById(activeIdAsInt)
 	if err != nil {
 		http.Error(writer, "Itemid not found", http.StatusNotFound)
+		return
 	}
 
 	getTemplateAndExecute("edit.gohtml", writer, activeItem)
