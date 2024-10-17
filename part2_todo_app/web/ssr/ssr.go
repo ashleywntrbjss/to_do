@@ -9,17 +9,19 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/view-all", handleViewAllToDoItemsPage)
-	mux.HandleFunc("/add-new", handleAddNewToDoItemPage)
-	mux.HandleFunc("/edit", handleEditToDoItemPage)
+	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)
+	mux.HandleFunc("GET /add-new", handleGETAddNewToDoItemPage)
+	mux.HandleFunc("POST /add-new", handlePOSTAddNewToDoItemPage)
+	mux.HandleFunc("GET /edit/{itemId}", handleGETEditToDoItemPage)
 
-	mux.HandleFunc("/favicon.ico", handleFavicon)
-	mux.HandleFunc("/", handleHomePage)
+	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)
+	mux.HandleFunc("GET /", handleGETHomePage)
 
 	fmt.Println("Starting server at http://localhost:8080")
 	err := http.ListenAndServe("localhost:8080", mux)
@@ -47,7 +49,7 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 	return *activeTemplate, nil
 }
 
-func handleHomePage(writer http.ResponseWriter, request *http.Request) {
+func handleGETHomePage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "Root '/' ")
 
 	if request.Method == "GET" {
@@ -65,69 +67,76 @@ func handleHomePage(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func handleViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
+func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/view-all'")
-	if request.Method == "GET" {
 
-		activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = activeTemplate.Execute(writer, repo.GetAll())
-		if err != nil {
-			fmt.Println("Error executing template:", err)
-			return
-		}
+	activeTemplate, err := getTemplateByFilename("viewAll.gohtml")
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+
+	err = activeTemplate.Execute(writer, repo.GetAll())
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		return
+	}
+
 }
 
-func handleAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+func handleGETAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/view-all'")
-	if request.Method == "GET" {
-		activeTemplate, err := getTemplateByFilename("addNew.gohtml")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		err = activeTemplate.Execute(writer, repo.GetAll())
-		if err != nil {
-			fmt.Println("Error executing template:", err)
-			return
-		}
+	activeTemplate, err := getTemplateByFilename("addNew.gohtml")
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	if request.Method == "POST" {
-		err := request.ParseForm()
-		if err != nil {
-			http.Error(writer, "Unable to parse form", http.StatusBadRequest)
-			return
-		}
-
-		title := request.FormValue("title")
-		if title == "" {
-			http.Error(writer, "Title is required", http.StatusBadRequest)
-			return
-		}
-
-		_ = repo.CreateItemFromTitle(title)
-
-		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
+	err = activeTemplate.Execute(writer, repo.GetAll())
+	if err != nil {
+		fmt.Println("Error executing template:", err)
+		return
 	}
 }
 
-func handleEditToDoItemPage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/edit'")
-	if request.Method == "GET" {
+func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/view-all'")
 
+	err := request.ParseForm()
+	if err != nil {
+		http.Error(writer, "Unable to parse form", http.StatusBadRequest)
+		return
 	}
-	if request.Method == "PUT" {
 
+	title := request.FormValue("title")
+	if title == "" {
+		http.Error(writer, "Title is required", http.StatusBadRequest)
+		return
 	}
+
+	_ = repo.CreateItemFromTitle(title)
+
+	http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
 }
 
-func handleFavicon(writer http.ResponseWriter, request *http.Request) {
+func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/edit/'")
+	activeId := request.PathValue("itemId")
+	activeIdAsInt, err := strconv.Atoi(activeId)
+
+	if err != nil {
+		http.Error(writer, "Invalid itemId format", http.StatusBadRequest)
+	}
+
+	activeItem, err := repo.GetById(activeIdAsInt)
+	if err != nil {
+		http.Error(writer, "Itemid not found", http.StatusNotFound)
+	}
+
+	fmt.Println(activeItem)
+
+}
+
+func handleGETFavicon(writer http.ResponseWriter, request *http.Request) {
 	return
 }
