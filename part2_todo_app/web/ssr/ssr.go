@@ -35,19 +35,26 @@ func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any
 
 	activeTemplate, err := getTemplateByFilename(filename)
 	if err != nil {
+		fmt.Println("error getting template", err)
 		http.Error(writer, "internal Server Error, see logs for details", http.StatusInternalServerError)
 		return
 	}
 
-	executeTemplate(activeTemplate, writer, data)
+	executeTemplate(filename, activeTemplate, writer, data)
 }
 
 func getTemplateByFilename(filename string) (template.Template, error) {
 	baseFilepath := filepath.Join("part2_todo_app", "web", "ssr", "templates")
 
+	layoutFilepath := filepath.Join(baseFilepath, "layout")
+
+	baseTemplatePath := filepath.Join(layoutFilepath, "base.gohtml")
+	footerTemplatePath := filepath.Join(layoutFilepath, "footer.gohtml")
+	navbarTemplatePath := filepath.Join(layoutFilepath, "navbar.gohtml")
+
 	templatePath := filepath.Join(baseFilepath, filename)
 
-	activeTemplate, err := template.ParseFiles(templatePath)
+	activeTemplate, err := template.ParseFiles(baseTemplatePath, navbarTemplatePath, footerTemplatePath, templatePath)
 	if err != nil {
 		// include the current working directory to provide context
 		cwd, getWdErr := os.Getwd()
@@ -61,8 +68,8 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 	return *activeTemplate, nil
 }
 
-func executeTemplate(template template.Template, writer http.ResponseWriter, data any) {
-	err := template.Execute(writer, data)
+func executeTemplate(filename string, template template.Template, writer http.ResponseWriter, data any) {
+	err := template.ExecuteTemplate(writer, filename, data)
 
 	if err != nil {
 		fmt.Println("error executing template:", err)

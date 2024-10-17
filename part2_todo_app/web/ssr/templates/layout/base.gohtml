@@ -1,0 +1,23 @@
+{{define "base"}}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title>To Do App</title>
+        <link
+                href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+                rel="stylesheet">
+    </head>
+    <body>
+    {{template "navbar"}}
+    <div class="container-fluid">
+        {{template "content" .}}
+    </div>
+
+    <script scr="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js">
+    </script>
+    <script scr="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+    </script>
+    </body>
+    {{template "footer"}}
+    </html>
+{{end}}
