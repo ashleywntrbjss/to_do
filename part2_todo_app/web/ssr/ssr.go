@@ -19,6 +19,7 @@ func ListenAndServe() {
 	mux.HandleFunc("GET /add-new", handleGETAddNewToDoItemPage)
 	mux.HandleFunc("POST /add-new", handlePOSTAddNewToDoItemPage)
 	mux.HandleFunc("GET /edit/{itemId}", handleGETEditToDoItemPage)
+	mux.HandleFunc("PATCH /edit", handlePATCHEditToDoItem)
 
 	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)
 	mux.HandleFunc("GET /", handleGETHomePage)
@@ -126,6 +127,68 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 
 	getTemplateAndExecute("edit.gohtml", writer, activeItem)
 
+}
+
+func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
+	err := request.ParseForm()
+	if err != nil {
+		fmt.Println("unable to parse form", err)
+		http.Error(writer, "Unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	itemId := request.FormValue("id")
+	itemIdAsInt, err := strconv.Atoi(itemId)
+	if err != nil {
+		fmt.Println("invalid item id format", err)
+		http.Error(writer, "Invalid itemId format", http.StatusBadRequest)
+		return
+	}
+
+	item, err := repo.GetById(itemIdAsInt)
+	if err != nil {
+		fmt.Println("item id not found", err)
+		http.Error(writer, "ItemId not found", http.StatusNotFound)
+		return
+	}
+
+	title := request.FormValue("title")
+
+	if title != "" {
+		if title != item.Title {
+			err := repo.UpdateItemTitleById(title, itemIdAsInt)
+			if err != nil {
+				fmt.Println("unable to update item title", err)
+				http.Error(writer, "unable to update item title", http.StatusInternalServerError)
+				return
+			}
+			successMessage(writer, "Updated item title")
+		}
+	}
+
+	isComplete := request.FormValue("IsComplete")
+
+	if isComplete != "" {
+		if isComplete == "true" {
+			repo.UpdateItemCompletionStatusById(true, itemIdAsInt)
+		} else if isComplete == "false" {
+			repo.UpdateItemCompletionStatusById(false, itemIdAsInt)
+		} else {
+			fmt.Println("unable to update item completion status", err)
+			http.Error(writer, "Invalid IsComplete value", http.StatusBadRequest)
+			return
+		}
+		successMessage(writer, "Updated item completion status")
+	}
+}
+
+func successMessage(writer http.ResponseWriter, message string) {
+	_, err := writer.Write([]byte(message))
+	if err != nil {
+		fmt.Println("Error writing success message:", err)
+		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		return
+	}
 }
 
 func handleGETFavicon(writer http.ResponseWriter, request *http.Request) {

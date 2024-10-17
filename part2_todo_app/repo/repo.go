@@ -44,17 +44,17 @@ func GetAll() []todoitem.ToDoItem {
 	return toDoItemRepo
 }
 
-func UpdateItemTitleById(newTitle string, itemId int) {
+func UpdateItemTitleById(newTitle string, itemId int) error {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	index, isFound := findIndexById(itemId)
 	if !isFound {
-		fmt.Println("Item not found")
-		return
+		return errors.New("cannot find item by provided id")
 	}
 
 	toDoItemRepo[index].Title = newTitle
+	return nil
 }
 
 func UpdateItemCompletionStatusById(completionStatus bool, itemId int) {
