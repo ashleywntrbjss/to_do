@@ -35,6 +35,7 @@ func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any
 	activeTemplate, err := getTemplateByFilename(filename)
 	if err != nil {
 		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		return
 	}
 
 	executeTemplate(activeTemplate, writer, data)
@@ -121,7 +122,7 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 		http.Error(writer, "Itemid not found", http.StatusNotFound)
 	}
 
-	fmt.Println(activeItem)
+	getTemplateAndExecute("edit.gohtml", writer, activeItem)
 
 }
 

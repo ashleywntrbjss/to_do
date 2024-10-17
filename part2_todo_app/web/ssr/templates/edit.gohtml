@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en-gb">
 <head>
-    <title>View To Do Items</title>
+    <title>Edit To Do item</title>
 </head>
 <Body>
 <h1><a href="/">To Do App</a></h1>
-<h2>To Do items</h2>
-{{range .}}
+<h2>Edit To Do item</h2>
+<h3>{{.Title}}</h3>
     <div>
-    <h3>{{.Title}}</h3>
         <span>
     Completed:
     {{if .IsComplete}}
@@ -30,6 +29,5 @@
         </span>
         </div>
     {{end}}
-{{end}}
 </Body>
 </html>
