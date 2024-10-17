@@ -27,7 +27,7 @@ func ListenAndServe() {
 	fmt.Println("Starting server at http://localhost:8080")
 	err := http.ListenAndServe("localhost:8080", mux)
 	if err != nil {
-		log.Fatalln("There's an error with the server:", err)
+		log.Fatalln("there's an error with the server:", err)
 	}
 }
 
@@ -35,7 +35,7 @@ func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any
 
 	activeTemplate, err := getTemplateByFilename(filename)
 	if err != nil {
-		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		http.Error(writer, "internal Server Error, see logs for details", http.StatusInternalServerError)
 		return
 	}
 
@@ -55,7 +55,7 @@ func getTemplateByFilename(filename string) (template.Template, error) {
 			panic(getWdErr)
 		}
 
-		return template.Template{}, errors.New("Error parsing template " + err.Error() + ". Current working directory:" + cwd)
+		return template.Template{}, errors.New("error parsing template " + err.Error() + ". current working directory:" + cwd)
 	}
 
 	return *activeTemplate, nil
@@ -65,8 +65,8 @@ func executeTemplate(template template.Template, writer http.ResponseWriter, dat
 	err := template.Execute(writer, data)
 
 	if err != nil {
-		fmt.Println("Error executing template:", err)
-		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		fmt.Println("error executing template:", err)
+		http.Error(writer, "internal server error, see logs for details", http.StatusInternalServerError)
 		return
 	}
 }
@@ -94,13 +94,13 @@ func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Requ
 
 	err := request.ParseForm()
 	if err != nil {
-		http.Error(writer, "Unable to parse form", http.StatusBadRequest)
+		http.Error(writer, "unable to parse form", http.StatusBadRequest)
 		return
 	}
 
 	title := request.FormValue("title")
 	if title == "" {
-		http.Error(writer, "Title is required", http.StatusBadRequest)
+		http.Error(writer, "title is required", http.StatusBadRequest)
 		return
 	}
 
@@ -115,13 +115,13 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 	activeIdAsInt, err := strconv.Atoi(activeId)
 
 	if err != nil {
-		http.Error(writer, "Invalid itemId format", http.StatusBadRequest)
+		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
 	activeItem, err := repo.GetById(activeIdAsInt)
 	if err != nil {
-		http.Error(writer, "ItemId not found", http.StatusNotFound)
+		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
 	}
 
@@ -134,7 +134,7 @@ func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) 
 	err := request.ParseForm()
 	if err != nil {
 		fmt.Println("unable to parse form", err)
-		http.Error(writer, "Unable to parse form", http.StatusBadRequest)
+		http.Error(writer, "unable to parse form", http.StatusBadRequest)
 		return
 	}
 
@@ -142,14 +142,14 @@ func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) 
 	itemIdAsInt, err := strconv.Atoi(itemId)
 	if err != nil {
 		fmt.Println("invalid item id format", err)
-		http.Error(writer, "Invalid itemId format", http.StatusBadRequest)
+		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
 	item, err := repo.GetById(itemIdAsInt)
 	if err != nil {
 		fmt.Println("item id not found", err)
-		http.Error(writer, "ItemId not found", http.StatusNotFound)
+		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
 	}
 
@@ -163,31 +163,37 @@ func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) 
 				http.Error(writer, "unable to update item title", http.StatusInternalServerError)
 				return
 			}
-			successMessage(writer, "Updated item title")
+			successMessage(writer, "updated item title")
 		}
 	}
 
 	isComplete := request.FormValue("isComplete")
 
 	if isComplete != "" {
+		var err error
 		if isComplete == "true" {
-			repo.UpdateItemCompletionStatusById(true, itemIdAsInt)
+			err = repo.UpdateItemCompletionStatusById(true, itemIdAsInt)
 		} else if isComplete == "false" {
-			repo.UpdateItemCompletionStatusById(false, itemIdAsInt)
+			err = repo.UpdateItemCompletionStatusById(false, itemIdAsInt)
 		} else {
+			err = errors.New("invalid value for isComplete")
+		}
+
+		if err != nil {
 			fmt.Println("unable to update item completion status", err)
-			http.Error(writer, "Invalid IsComplete value", http.StatusBadRequest)
+			http.Error(writer, "unable to update item completion status", http.StatusBadRequest)
 			return
 		}
-		successMessage(writer, "Updated item completion status")
+
+		successMessage(writer, "updated item completion status")
 	}
 }
 
 func successMessage(writer http.ResponseWriter, message string) {
 	_, err := writer.Write([]byte(message + "\n"))
 	if err != nil {
-		fmt.Println("Error writing success message:", err)
-		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
+		fmt.Println("error writing success message:", err)
+		http.Error(writer, "internal server error, see logs for details", http.StatusInternalServerError)
 		return
 	}
 }

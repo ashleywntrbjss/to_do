@@ -57,17 +57,18 @@ func UpdateItemTitleById(newTitle string, itemId int) error {
 	return nil
 }
 
-func UpdateItemCompletionStatusById(completionStatus bool, itemId int) {
+func UpdateItemCompletionStatusById(completionStatus bool, itemId int) error {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	index, isFound := findIndexById(itemId)
 	if !isFound {
-		fmt.Println("Item not found")
-		return
+		fmt.Println("item not found")
+		return errors.New("item not found")
 	}
 
 	toDoItemRepo[index].IsComplete = completionStatus
+	return nil
 }
 
 func DeleteItemById(itemId int) {
@@ -88,7 +89,7 @@ func findIndexById(id int) (int, bool) {
 			return index, true
 		}
 	}
-	fmt.Println("Provided item Id not found")
+	fmt.Println("provided item Id not found")
 	return -1, false
 }
 
