@@ -130,6 +130,7 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/edit/'")
 	err := request.ParseForm()
 	if err != nil {
 		fmt.Println("unable to parse form", err)
@@ -166,7 +167,7 @@ func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) 
 		}
 	}
 
-	isComplete := request.FormValue("IsComplete")
+	isComplete := request.FormValue("isComplete")
 
 	if isComplete != "" {
 		if isComplete == "true" {
@@ -183,7 +184,7 @@ func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) 
 }
 
 func successMessage(writer http.ResponseWriter, message string) {
-	_, err := writer.Write([]byte(message))
+	_, err := writer.Write([]byte(message + "\n"))
 	if err != nil {
 		fmt.Println("Error writing success message:", err)
 		http.Error(writer, "Internal Server Error, see logs for details", http.StatusInternalServerError)
