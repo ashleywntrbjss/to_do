@@ -2,6 +2,7 @@ package ssr
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -87,7 +88,17 @@ func handleGETHomePage(writer http.ResponseWriter, request *http.Request) {
 func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/view-all'")
 
-	getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
+	acceptHeader := request.Header.Get("Accept")
+
+	if acceptHeader == "application/json" {
+		writer.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(writer).Encode(repo.GetAll()); err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
+	}
+
 }
 
 func handleGETAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
