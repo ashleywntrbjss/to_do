@@ -114,6 +114,7 @@ func handleGETViewToDoItem(writer http.ResponseWriter, request *http.Request) {
 		}
 	} else {
 		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
+		// no fallback html page so only allow json content type
 	}
 }
 
