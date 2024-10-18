@@ -2,6 +2,7 @@ package ssr
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -92,19 +93,14 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/add-new'")
 
-	err := request.ParseForm()
-	if err != nil {
-		http.Error(writer, "unable to parse form", http.StatusBadRequest)
+	var toDo todoitem.ToDoItem
+
+	if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	title := request.FormValue("title")
-	if title == "" {
-		http.Error(writer, "title is required", http.StatusBadRequest)
-		return
-	}
-
-	_ = repo.CreateItemFromTitle(title)
+	repo.AddNew(toDo)
 
 	http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
 }

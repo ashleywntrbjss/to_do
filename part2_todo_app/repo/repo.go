@@ -25,6 +25,14 @@ func CreateItemFromTitle(title string) todoitem.ToDoItem {
 	return newItem
 }
 
+func AddNew(item todoitem.ToDoItem) {
+	repoLock.Lock()
+	defer repoLock.Unlock()
+
+	item.Id = newIndex()
+	toDoItemRepo = append(toDoItemRepo, item)
+}
+
 func GetById(itemId int) (todoitem.ToDoItem, error) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
