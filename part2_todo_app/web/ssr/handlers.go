@@ -3,6 +3,7 @@ package ssr
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"net/http"
+	"path/filepath"
 	"strconv"
 )
 
@@ -55,5 +56,6 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 }
 
 func handleGETFavicon(writer http.ResponseWriter, request *http.Request) {
-	return
+	faviconFilepath := filepath.Join("part2_todo_app", "web", "ssr", "templates", "layout", "toDoFavicon.ico")
+	http.ServeFile(writer, request, faviconFilepath)
 }
