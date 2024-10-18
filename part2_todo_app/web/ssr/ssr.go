@@ -1,7 +1,6 @@
 package ssr
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -14,17 +13,14 @@ import (
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /view/{itemId}", handleGETToDoItem)
 	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)
 	mux.HandleFunc("GET /add-new", handleGETAddNewToDoItemPage)
-	mux.HandleFunc("POST /add-new", handlePOSTAddNewToDoItemPage)
 	mux.HandleFunc("GET /edit/{itemId}", handleGETEditToDoItemPage)
-	mux.HandleFunc("PATCH /edit", handlePATCHEditToDoItem)
 
 	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)
 	mux.HandleFunc("GET /", handleGETHomePage)
 
-	fmt.Println("Starting server at http://localhost:8080")
+	fmt.Println("Starting template server at http://localhost:8080")
 	err := http.ListenAndServe("localhost:8080", mux)
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
@@ -75,13 +71,5 @@ func executeTemplate(template template.Template, writer http.ResponseWriter, dat
 		fmt.Println("error executing template:", err)
 		http.Error(writer, "internal server error, see logs for details", http.StatusInternalServerError)
 		return
-	}
-}
-
-func encodeJson(writer http.ResponseWriter, data any) {
-	writer.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(writer).Encode(data); err != nil {
-		fmt.Println("error encoding json:", err)
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }
