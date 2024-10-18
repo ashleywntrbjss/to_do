@@ -43,7 +43,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 
 	var toDo todoitem.ToDoItem
 
-	err := decodeJSONBody(writer, request, toDo)
+	err := decodeJSONBody(writer, request, &toDo)
 
 	if err != nil {
 		fmt.Println("error decoding request body:", err)
