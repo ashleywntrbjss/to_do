@@ -40,6 +40,8 @@ func AddNew(item todoitem.ToDoItem) (int, error) {
 
 	toDoItemRepo = append(toDoItemRepo, item)
 
+	fmt.Println("Created new item", item)
+
 	return item.Id, nil
 }
 
@@ -107,7 +109,6 @@ func findIndexById(id int) (int, bool) {
 			return index, true
 		}
 	}
-	fmt.Println("provided item Id not found")
 	return -1, false
 }
 

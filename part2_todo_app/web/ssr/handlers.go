@@ -22,7 +22,7 @@ func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Req
 func handleGETCreateToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/add-new'")
 
-	getTemplateAndExecute("addNew.gohtml", writer, nil)
+	getTemplateAndExecute("create.gohtml", writer, nil)
 }
 
 func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request) {

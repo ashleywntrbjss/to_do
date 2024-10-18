@@ -1,0 +1,56 @@
+{{define "content"}}
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+    <title>Add new To Do Item</title>
+</head>
+<Body>
+<h2>Add new To Do item</h2>
+<form id="createForm" method="POST">
+    <fieldset>
+        <legend>Create new To Do item</legend>
+
+        <div>
+            <label for="title">Title of To Do item</label>
+            <input id="title" name="title" type="text" placeholder="Wash dishes">
+        </div>
+
+        <div>
+            <input type="submit" value="Submit">
+        </div>
+    </fieldset>
+</form>
+</Body>
+
+<script>
+    document.getElementById("createForm").addEventListener('submit', async function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const jsonData = {};
+
+        formData.forEach((value, key) => {
+            jsonData[key] = value;
+        });
+
+        try {
+            const response = await fetch('http://localhost:8085/api/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            });
+
+            const result = await response;
+            if (result.status === 201) {
+                window.location.href = 'http://localhost:8080/view-all';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+</script>
+</html>
+{{end}}

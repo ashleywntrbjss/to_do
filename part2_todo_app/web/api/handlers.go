@@ -65,13 +65,13 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 	}
 
 	writer.Header().Set("Location", "/item/"+strconv.Itoa(newItemIndex))
+	writer.WriteHeader(http.StatusCreated)
 	_, err = writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
 	if err != nil {
 		fmt.Println("error writing response:", err)
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writer.WriteHeader(http.StatusCreated)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
