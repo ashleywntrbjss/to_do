@@ -56,11 +56,21 @@ func TestToggleCompletionById(t *testing.T) {
 		{Id: 1, Title: "Task 1", IsComplete: false},
 		{Id: 2, Title: "Task 2", IsComplete: false},
 	}
-	UpdateItemCompletionStatusById(true, 2)
+	err := UpdateItemCompletionStatusById(true, 2)
+
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
 	if !toDoItemRepo[1].IsComplete {
 		t.Errorf("Expected IsComplete to be true, got %v", toDoItemRepo[1].IsComplete)
 	}
-	UpdateItemCompletionStatusById(false, 2)
+	err = UpdateItemCompletionStatusById(false, 2)
+
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+
 	if toDoItemRepo[1].IsComplete {
 		t.Errorf("Expected IsComplete to be false, got %v", toDoItemRepo[1].IsComplete)
 	}
