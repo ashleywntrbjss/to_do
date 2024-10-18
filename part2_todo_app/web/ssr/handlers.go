@@ -69,26 +69,6 @@ func handleGETAddNewToDoItemPage(writer http.ResponseWriter, request *http.Reque
 	getTemplateAndExecute("addNew.gohtml", writer, nil)
 }
 
-func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/add-new'")
-
-	err := request.ParseForm()
-	if err != nil {
-		http.Error(writer, "unable to parse form", http.StatusBadRequest)
-		return
-	}
-
-	title := request.FormValue("title")
-	if title == "" {
-		http.Error(writer, "title is required", http.StatusBadRequest)
-		return
-	}
-
-	_ = repo.CreateItemFromTitle(title)
-
-	http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
-}
-
 func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/edit/'")
 	activeId := request.PathValue("itemId")
@@ -107,6 +87,26 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 
 	getTemplateAndExecute("edit.gohtml", writer, activeItem)
 
+}
+
+func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/add-new'")
+
+	err := request.ParseForm()
+	if err != nil {
+		http.Error(writer, "unable to parse form", http.StatusBadRequest)
+		return
+	}
+
+	title := request.FormValue("title")
+	if title == "" {
+		http.Error(writer, "title is required", http.StatusBadRequest)
+		return
+	}
+
+	_ = repo.CreateItemFromTitle(title)
+
+	http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
