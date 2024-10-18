@@ -93,16 +93,30 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/add-new'")
 
-	var toDo todoitem.ToDoItem
+	acceptHeader := request.Header.Get("Accept")
 
-	if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
+	if acceptHeader == "application/json" {
+
+		var toDo todoitem.ToDoItem
+
+		if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
+			http.Error(writer, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		newItemIndex := repo.AddNew(toDo)
+
+		writer.Header().Set("Location", "/item/"+strconv.Itoa(newItemIndex))
+		_, err := writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
+		if err != nil {
+			return
+		}
+		writer.WriteHeader(http.StatusCreated)
+
+		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
+	} else {
+		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
 	}
-
-	repo.AddNew(toDo)
-
-	http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
