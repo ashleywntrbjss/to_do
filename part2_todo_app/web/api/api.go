@@ -11,8 +11,8 @@ func ListenAndServe() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /api/get/{itemId}", handleGETToDoItem)
-	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItemsPage)
-	mux.HandleFunc("POST /create", handlePOSTAddNewToDoItemPage)
+	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItems)
+	mux.HandleFunc("POST /create", handlePOSTCreateToDoItem)
 	mux.HandleFunc("PATCH /edit", handlePATCHEditToDoItem)
 
 	fmt.Println("Starting api server at http://localhost:8085")

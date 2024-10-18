@@ -14,7 +14,7 @@ func ListenAndServe() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)
-	mux.HandleFunc("GET /add-new", handleGETAddNewToDoItemPage)
+	mux.HandleFunc("GET /create", handleGETCreateToDoItemPage)
 	mux.HandleFunc("GET /edit/{itemId}", handleGETEditToDoItemPage)
 
 	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)

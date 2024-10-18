@@ -33,39 +33,30 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 	encodeJson(writer, responseItem)
 }
 
-func handleGETAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
+func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/view-all'")
 
 	encodeJson(writer, repo.GetAll())
 }
 
-func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/add-new'")
 
-	acceptHeader := request.Header.Get("Accept")
+	var toDo todoitem.ToDoItem
 
-	switch acceptHeader {
-	case "application/json":
-		var toDo todoitem.ToDoItem
-
-		if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		newItemIndex := repo.AddNew(toDo)
-
-		writer.Header().Set("Location", "/item/"+strconv.Itoa(newItemIndex))
-		_, err := writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
-		if err != nil {
-			return
-		}
-		writer.WriteHeader(http.StatusCreated)
-
-		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
-	default:
-		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
+	if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
+
+	newItemIndex := repo.AddNew(toDo)
+
+	writer.Header().Set("Location", "/item/"+strconv.Itoa(newItemIndex))
+	_, err := writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
+	if err != nil {
+		return
+	}
+	writer.WriteHeader(http.StatusCreated)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {

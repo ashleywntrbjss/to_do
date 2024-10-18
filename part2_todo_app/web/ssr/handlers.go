@@ -19,7 +19,7 @@ func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Req
 	getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
 }
 
-func handleGETAddNewToDoItemPage(writer http.ResponseWriter, request *http.Request) {
+func handleGETCreateToDoItemPage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "'/add-new'")
 
 	getTemplateAndExecute("addNew.gohtml", writer, nil)
