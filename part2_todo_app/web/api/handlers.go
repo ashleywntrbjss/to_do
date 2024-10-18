@@ -49,11 +49,18 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	newItemIndex := repo.AddNew(toDo)
+	newItemIndex, err := repo.AddNew(toDo)
+	if err != nil {
+		fmt.Println("error adding new item:", err)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	writer.Header().Set("Location", "/item/"+strconv.Itoa(newItemIndex))
-	_, err := writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
+	_, err = writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
 	if err != nil {
+		fmt.Println("error writing response:", err)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	writer.WriteHeader(http.StatusCreated)

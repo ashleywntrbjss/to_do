@@ -25,14 +25,22 @@ func CreateItemFromTitle(title string) todoitem.ToDoItem {
 	return newItem
 }
 
-func AddNew(item todoitem.ToDoItem) int {
+func AddNew(item todoitem.ToDoItem) (int, error) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	item.Id = newIndex()
+
+	_, isFound := findIndexById(item.Id)
+
+	if isFound {
+		fmt.Println("Item already exists")
+		return -1, errors.New("item already exists")
+	}
+
 	toDoItemRepo = append(toDoItemRepo, item)
 
-	return item.Id
+	return item.Id, nil
 }
 
 func GetById(itemId int) (todoitem.ToDoItem, error) {
