@@ -10,8 +10,6 @@ import (
 )
 
 func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, request.URL.Path)
-
 	activeId := request.PathValue("itemId")
 	activeIdAsInt, err := strconv.Atoi(activeId)
 
@@ -33,14 +31,10 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, request.URL.Path)
-
 	encodeJson(writer, repo.GetAll())
 }
 
 func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, request.URL.Path)
-
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
@@ -75,8 +69,6 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, request.URL.Path)
-
 	err := request.ParseForm()
 	if err != nil {
 		fmt.Println("unable to parse form", err)

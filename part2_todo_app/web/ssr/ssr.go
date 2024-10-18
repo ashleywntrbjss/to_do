@@ -13,6 +13,7 @@ import (
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /view/{itemId}", handleGETViewToDoItemPage)
 	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)
 	mux.HandleFunc("GET /create", handleGETCreateToDoItemPage)
 	mux.HandleFunc("GET /edit/{itemId}", handleGETEditToDoItemPage)
@@ -21,10 +22,17 @@ func ListenAndServe() {
 	mux.HandleFunc("GET /", handleGETHomePage)
 
 	fmt.Println("Starting template server at http://localhost:8080")
-	err := http.ListenAndServe("localhost:8080", mux)
+	err := http.ListenAndServe("localhost:8080", middleware(mux))
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
 	}
+}
+
+func middleware(existingHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println(request.Method, request.URL.Path)
+		existingHandler.ServeHTTP(writer, request)
+	})
 }
 
 func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any) {

@@ -29,9 +29,11 @@
             </svg>
             {{end}}
             <h3 style="margin:unset;padding: unset;">{{.Title}}</h3>
-            <a href="/edit/{{.Id}}" style="margin-left: auto">Edit</a>
+            <div style="margin-left: auto">
+                <a href="/view/{{.Id}}">View</a>
+                <a href="/edit/{{.Id}}">Edit</a>
             </div>
-
+            </div>
 
     {{end}}
         </div>

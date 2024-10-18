@@ -19,24 +19,26 @@ func ListenAndServe() {
 	mux.HandleFunc("PATCH /api/edit", handlePATCHEditToDoItem)
 
 	fmt.Println("Starting api server at http://localhost:8085")
-	err := http.ListenAndServe("localhost:8085", corsMiddleware(mux))
+	err := http.ListenAndServe("localhost:8085", middleware(mux))
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
 	}
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+func middleware(existingHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println(request.Method, request.URL.Path)
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
+		writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if request.Method == "OPTIONS" {
+			writer.WriteHeader(http.StatusOK)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		existingHandler.ServeHTTP(writer, request)
 	})
 }
 
