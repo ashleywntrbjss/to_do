@@ -16,6 +16,7 @@ import (
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /view/{itemId}", handleGETViewToDoItem)
 	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)
 	mux.HandleFunc("GET /add-new", handleGETAddNewToDoItemPage)
 	mux.HandleFunc("POST /add-new", handlePOSTAddNewToDoItemPage)
@@ -83,6 +84,37 @@ func handleGETHomePage(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(request.Method, "Root '/' ")
 
 	getTemplateAndExecute("home.gohtml", writer, nil)
+}
+
+func handleGETViewToDoItem(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/view-all'")
+
+	acceptHeader := request.Header.Get("Accept")
+	activeId := request.PathValue("itemId")
+	activeIdAsInt, err := strconv.Atoi(activeId)
+
+	if err != nil {
+		fmt.Println("error converting activeId to int:", err)
+		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
+		return
+	}
+
+	responseItem, err := repo.GetById(activeIdAsInt)
+
+	if err != nil {
+		fmt.Println("error getting item:", err)
+		http.Error(writer, "unable to retrieve item", http.StatusBadRequest)
+		return
+	}
+
+	if acceptHeader == "application/json" {
+		writer.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(writer).Encode(responseItem); err != nil {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
+	}
 }
 
 func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
