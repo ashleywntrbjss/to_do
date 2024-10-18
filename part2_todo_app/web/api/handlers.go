@@ -3,7 +3,6 @@ package api
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,7 +10,7 @@ import (
 )
 
 func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/view'")
+	fmt.Println(request.Method, request.URL.Path)
 
 	activeId := request.PathValue("itemId")
 	activeIdAsInt, err := strconv.Atoi(activeId)
@@ -34,25 +33,34 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/view-all'")
+	fmt.Println(request.Method, request.URL.Path)
 
 	encodeJson(writer, repo.GetAll())
 }
 
 func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/add-new'")
+	fmt.Println(request.Method, request.URL.Path)
 
 	var toDo todoitem.ToDoItem
 
-	if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
+	err := decodeJSONBody(writer, request, toDo)
+
+	if err != nil {
+		fmt.Println("error decoding request body:", err)
+		http.Error(writer, "error decoding request content", http.StatusBadRequest)
+		return
+	}
+
+	if toDo.Title == "" {
+		fmt.Println("Validation failed: item must have title")
+		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
 		return
 	}
 
 	newItemIndex, err := repo.AddNew(toDo)
 	if err != nil {
 		fmt.Println("error adding new item:", err)
-		http.Error(writer, err.Error(), http.StatusBadRequest)
+		http.Error(writer, "error saving new to do item", http.StatusBadRequest)
 		return
 	}
 
@@ -67,7 +75,8 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 }
 
 func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/edit/'")
+	fmt.Println(request.Method, request.URL.Path)
+
 	err := request.ParseForm()
 	if err != nil {
 		fmt.Println("unable to parse form", err)
