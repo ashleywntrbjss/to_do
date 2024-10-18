@@ -16,35 +16,34 @@ func handleGETHomePage(writer http.ResponseWriter, request *http.Request) {
 	getTemplateAndExecute("home.gohtml", writer, nil)
 }
 
-func handleGETViewToDoItem(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println(request.Method, "'/view-all'")
+func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println(request.Method, "'/view'")
 
 	acceptHeader := request.Header.Get("Accept")
-	activeId := request.PathValue("itemId")
-	activeIdAsInt, err := strconv.Atoi(activeId)
 
-	if err != nil {
-		fmt.Println("error converting activeId to int:", err)
-		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
-		return
-	}
+	switch acceptHeader {
+	case "application/json":
+		activeId := request.PathValue("itemId")
+		activeIdAsInt, err := strconv.Atoi(activeId)
 
-	responseItem, err := repo.GetById(activeIdAsInt)
-
-	if err != nil {
-		fmt.Println("error getting item:", err)
-		http.Error(writer, "unable to retrieve item", http.StatusBadRequest)
-		return
-	}
-
-	if acceptHeader == "application/json" {
-		writer.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(writer).Encode(responseItem); err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
+		if err != nil {
+			fmt.Println("error converting activeId to int:", err)
+			http.Error(writer, "invalid itemId format", http.StatusBadRequest)
+			return
 		}
-	} else {
+
+		responseItem, err := repo.GetById(activeIdAsInt)
+
+		if err != nil {
+			fmt.Println("error getting item:", err)
+			http.NotFound(writer, request)
+			return
+		}
+
+		encodeJson(writer, responseItem)
+	default:
+		// implement template page when possible
 		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
-		// no fallback html page so only allow json content type
 	}
 }
 
@@ -53,12 +52,10 @@ func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Req
 
 	acceptHeader := request.Header.Get("Accept")
 
-	if acceptHeader == "application/json" {
-		writer.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(writer).Encode(repo.GetAll()); err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-		}
-	} else {
+	switch acceptHeader {
+	case "application/json":
+		encodeJson(writer, repo.GetAll())
+	default:
 		getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
 	}
 
@@ -95,8 +92,8 @@ func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Requ
 
 	acceptHeader := request.Header.Get("Accept")
 
-	if acceptHeader == "application/json" {
-
+	switch acceptHeader {
+	case "application/json":
 		var toDo todoitem.ToDoItem
 
 		if err := json.NewDecoder(request.Body).Decode(&toDo); err != nil {
@@ -114,7 +111,7 @@ func handlePOSTAddNewToDoItemPage(writer http.ResponseWriter, request *http.Requ
 		writer.WriteHeader(http.StatusCreated)
 
 		http.Redirect(writer, request, "/view-all", http.StatusSeeOther)
-	} else {
+	default:
 		http.Error(writer, "unsupported Accept header: "+acceptHeader, http.StatusNotAcceptable)
 	}
 }
