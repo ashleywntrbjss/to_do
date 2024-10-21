@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const ServerAddress = "localhost:8085"
+
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
@@ -20,8 +22,8 @@ func ListenAndServe() {
 	mux.HandleFunc("POST /api/create", handlePOSTCreateToDoItem)
 	mux.HandleFunc("PUT /api/edit", handlePUTEditToDoItem)
 
-	fmt.Println("Starting api server at http://localhost:8085")
-	err := http.ListenAndServe("localhost:8085", middleware(mux))
+	fmt.Println("Starting api server at http://" + ServerAddress)
+	err := http.ListenAndServe(ServerAddress, middleware(mux))
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
 	}
