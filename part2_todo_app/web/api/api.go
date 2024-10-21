@@ -30,7 +30,7 @@ func middleware(existingHandler http.Handler) http.Handler {
 		fmt.Println(request.Method, request.URL.Path)
 
 		writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
 		writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if request.Method == "OPTIONS" {

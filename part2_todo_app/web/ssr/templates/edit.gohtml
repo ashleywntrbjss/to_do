@@ -36,7 +36,7 @@
             <label for="title">Title of To Do item</label>
             <input id="title" name="title" type="text" placeholder="Wash dishes">
             <label for="is_complete">To Do item completion status</label>
-            <input id="is_complete" name="is_complete" type="checkbox" checked>
+            <input id="is_complete" name="is_complete" type="checkbox">
         </div>
 
         <div>
@@ -47,19 +47,58 @@
 
 </Body>
 <script>
-    document.getElementById("updateForm").addEventListener('submit', async function(event) {
+
+    const parseFormData = async (data)=>{
+        return await data.json();
+    }
+
+    const populateForm = (data) => {
+        console.log(data)
+        document.getElementById("title").value = data.title;
+        document.getElementById("is_complete").value = data.is_complete;
+    }
+
+
+    const itemId = ()=>{
+        const currentUrl = window.location.href;
+        return currentUrl.split('/').pop()
+    }
+
+    window.onload = async () => {
+        try {
+            console.log(itemId())
+            const existingItemResponse = await fetch(`http://localhost:8085/api/get/${itemId()}`, {
+                method: 'GET',
+            });
+
+            const result = await existingItemResponse;
+            if (result.status === 200) {
+
+                const resultAsJson = await parseFormData(result);
+
+                populateForm(resultAsJson)
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    document.getElementById("updateForm").addEventListener('submit', async event => {
         event.preventDefault(); // Prevent the default form submission
 
         const form = event.target;
         const formData = new FormData(form);
-        const jsonData = {};
 
+        const jsonData = {};
         formData.forEach((value, key) => {
+            console.log("value, key", value, key);
             jsonData[key] = value;
         });
 
+        jsonData["itemId"] = itemId()
+
         try {
-            const response = await fetch('http://localhost:8080/edit', {
+            const response = await fetch('http://localhost:8085/api/edit', {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -67,11 +106,9 @@
                 body: JSON.stringify(jsonData)
             });
 
-
-
             const result = await response;
             if (result.status === 200) {
-                console.log('Success:', result);
+                window.location.reload();
             }
         } catch (error) {
             console.error('Error:', error);
