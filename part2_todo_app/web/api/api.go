@@ -16,7 +16,7 @@ func ListenAndServe() {
 	mux.HandleFunc("GET /api/get/{itemId}", handleGETToDoItem)
 	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItems)
 	mux.HandleFunc("POST /api/create", handlePOSTCreateToDoItem)
-	mux.HandleFunc("PATCH /api/edit", handlePATCHEditToDoItem)
+	mux.HandleFunc("PUT /api/edit", handlePUTEditToDoItem)
 
 	fmt.Println("Starting api server at http://localhost:8085")
 	err := http.ListenAndServe("localhost:8085", middleware(mux))

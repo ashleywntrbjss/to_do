@@ -35,8 +35,8 @@
         <div>
             <label for="title">Title of To Do item</label>
             <input id="title" name="title" type="text" placeholder="Wash dishes">
-            <label for="is_complete">To Do item completion status</label>
-            <input id="is_complete" name="is_complete" type="checkbox">
+            <label for="isComplete">To Do item completion status</label>
+            <input id="isComplete" name="isComplete" type="checkbox">
         </div>
 
         <div>
@@ -46,6 +46,7 @@
 </form>
 
 </Body>
+<!--suppress JSUnresolvedReference -->
 <script>
 
     const parseFormData = async (data)=>{
@@ -55,13 +56,19 @@
     const populateForm = (data) => {
         console.log(data)
         document.getElementById("title").value = data.title;
-        document.getElementById("is_complete").value = data.is_complete;
+
+        const isComplete = data.isComplete;
+
+        if (isComplete) {
+            document.getElementById("isComplete").checked=true;
+        }
     }
 
 
     const itemId = ()=>{
         const currentUrl = window.location.href;
-        return currentUrl.split('/').pop()
+        const id = currentUrl.split('/').pop()
+        return parseInt(id)
     }
 
     window.onload = async () => {
@@ -89,17 +96,19 @@
         const form = event.target;
         const formData = new FormData(form);
 
-        const jsonData = {};
+        const jsonData = {}
+
         formData.forEach((value, key) => {
             console.log("value, key", value, key);
             jsonData[key] = value;
         });
 
-        jsonData["itemId"] = itemId()
+        jsonData["id"] = itemId()
+        jsonData["isComplete"] = document.getElementById("isComplete").checked
 
         try {
             const response = await fetch('http://localhost:8085/api/edit', {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },

@@ -3,7 +3,6 @@ package api
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -68,62 +67,45 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 	}
 }
 
-func handlePATCHEditToDoItem(writer http.ResponseWriter, request *http.Request) {
-	err := request.ParseForm()
+func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
+	var toDo todoitem.ToDoItem
+
+	err := decodeJSONBody(writer, request, &toDo)
+
 	if err != nil {
-		fmt.Println("unable to parse form", err)
-		http.Error(writer, "unable to parse form", http.StatusBadRequest)
+		fmt.Println("error decoding request body:", err)
+		http.Error(writer, "error decoding request content", http.StatusBadRequest)
 		return
 	}
 
-	itemId := request.FormValue("id")
-	itemIdAsInt, err := strconv.Atoi(itemId)
-	if err != nil {
-		fmt.Println("invalid item id format", err)
-		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
+	if toDo.Title == "" {
+		fmt.Println("Validation failed: item must have title")
+		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
 		return
 	}
 
-	item, err := repo.GetById(itemIdAsInt)
+	_, err = repo.GetById(toDo.Id)
+
 	if err != nil {
-		fmt.Println("item id not found", err)
-		http.Error(writer, "itemId not found", http.StatusNotFound)
+		fmt.Println("Validation failed: failed to retrieve existing to do item")
+		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
 		return
 	}
 
-	title := request.FormValue("title")
+	err = repo.UpdateItemTitleById(toDo.Title, toDo.Id)
 
-	if title != "" {
-		if title != item.Title {
-			err := repo.UpdateItemTitleById(title, itemIdAsInt)
-			if err != nil {
-				fmt.Println("unable to update item title", err)
-				http.Error(writer, "unable to update item title", http.StatusInternalServerError)
-				return
-			}
-			successMessage(writer, "updated item title")
-		}
+	if err != nil {
+		fmt.Println("Failed to update item:", err)
+		http.Error(writer, "failed to update to do item title", http.StatusBadRequest)
+		return
 	}
 
-	isComplete := request.FormValue("isComplete")
+	err = repo.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
 
-	if isComplete != "" {
-		var err error
-		if isComplete == "true" {
-			err = repo.UpdateItemCompletionStatusById(true, itemIdAsInt)
-		} else if isComplete == "false" {
-			err = repo.UpdateItemCompletionStatusById(false, itemIdAsInt)
-		} else {
-			err = errors.New("invalid value for isComplete")
-		}
-
-		if err != nil {
-			fmt.Println("unable to update item completion status", err)
-			http.Error(writer, "unable to update item completion status", http.StatusBadRequest)
-			return
-		}
-
-		successMessage(writer, "updated item completion status")
+	if err != nil {
+		fmt.Println("Failed to update item:", err)
+		http.Error(writer, "failed to update to do item title", http.StatusBadRequest)
+		return
 	}
 }
 
