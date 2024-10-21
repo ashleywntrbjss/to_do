@@ -5,9 +5,7 @@
     <title>Edit To Do item</title>
 </head>
 <Body>
-<h2>Edit To Do item</h2>
-
-    <div style="display: flex; align-items: center;">
+    <div class="toDoItem" style="margin-bottom: 10px">
 
     {{if .IsComplete}}
         <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,24 +24,31 @@
                       fill="#000000"/>
             </svg>
     {{end}}
-    <h3>{{.Title}}</h3>
+    <h3 style="margin:unset;padding: unset;">{{.Title}}</h3>
     </div>
-<form id="updateForm" method="POST">
-    <fieldset>
-        <legend>Edit To Do item</legend>
+    <div>
+        <form id="updateForm" method="POST">
+            <fieldset>
+                <legend>Edit To Do item</legend>
 
-        <div>
-            <label for="title">Title of To Do item</label>
-            <input id="title" name="title" type="text" placeholder="Wash dishes">
-            <label for="isComplete">To Do item completion status</label>
-            <input id="isComplete" name="isComplete" type="checkbox">
-        </div>
-
-        <div>
-            <input type="submit" value="Submit">
-        </div>
-    </fieldset>
-</form>
+                <div style="display: grid; font-size: large; row-gap: 10px;">
+                    <div >
+                        <span>
+                            <label for="title">Title: </label>
+                            <input id="title" name="title" type="text" placeholder="Wash dishes">
+                        </span>
+                        <span style="display: flex; align-items: center; gap: 5px;">
+                            <label for="isComplete" style="margin: unset; padding: unset">Completion status</label>
+                            <input id="isComplete" name="isComplete" type="checkbox" style="width: 20px; height: 20px; margin: unset; padding: unset;">
+                        </span>
+                    </div>
+                    <div>
+                        <input type="submit" value="Submit">
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 
 </Body>
 <!--suppress JSUnresolvedReference -->
