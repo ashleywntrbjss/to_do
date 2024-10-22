@@ -9,13 +9,12 @@ import (
 
 type InMemory struct {
 	store []todoitem.ToDoItem
+	lock  sync.RWMutex
 }
 
-var repoLock = sync.Mutex{}
-
 func (r *InMemory) CreateItemFromTitle(title string) todoitem.ToDoItem {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	newItem := todoitem.NewToDoItem(title)
 	newItem.Id = r.newIndex()
@@ -25,8 +24,8 @@ func (r *InMemory) CreateItemFromTitle(title string) todoitem.ToDoItem {
 }
 
 func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	item.Id = r.newIndex()
 
@@ -45,8 +44,8 @@ func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
 }
 
 func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 
 	index, isFound := r.findIndexById(itemId)
 
@@ -60,12 +59,14 @@ func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
 }
 
 func (r *InMemory) GetAll() []todoitem.ToDoItem {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	return r.store
 }
 
 func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
@@ -77,8 +78,8 @@ func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
 }
 
 func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId int) error {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
@@ -91,8 +92,8 @@ func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId 
 }
 
 func (r *InMemory) DeleteItemById(itemId int) error {
-	repoLock.Lock()
-	defer repoLock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
