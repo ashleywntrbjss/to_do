@@ -2,7 +2,7 @@ package cliapp
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/cmd/menu"
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
 	"fmt"
@@ -71,7 +71,7 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem := repo.CreateItemFromTitle(itemName)
+	newItem := inMemory.CreateItemFromTitle(itemName)
 
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
@@ -82,14 +82,14 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
+	todoitem.PrettyPrintToDoItems(inMemory.GetAll()...)
 	pauseForInput()
 }
 
 func handleEditItem() {
 	printDecoratedTitle("Edit To Do items")
 
-	todoitem.PrettyPrintToDoItems(repo.GetAll()...)
+	todoitem.PrettyPrintToDoItems(inMemory.GetAll()...)
 
 	userInput := readAndTrimUserInput("Provide the Id of the item to edit")
 
@@ -99,7 +99,7 @@ func handleEditItem() {
 		return
 	}
 
-	activeItem, err := repo.GetById(userInputAsInt)
+	activeItem, err := inMemory.GetById(userInputAsInt)
 
 	if err != nil {
 		fmt.Println("Unable to retrieve item from repo", err)
@@ -146,17 +146,17 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	switch editSelectionKey {
 	case "markCompletionStatus":
-		repo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
+		inMemory.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
 	case "updateTitle":
 		prompt := "Provide new title for item: '" + activeItem.Title + "'"
 		newTitle := readAndTrimUserInput(prompt)
-		repo.UpdateItemTitleById(newTitle, activeItem.Id)
+		inMemory.UpdateItemTitleById(newTitle, activeItem.Id)
 	case "deleteItem":
 		prompt := "Are you sure you wish to delete: '" + activeItem.Title + "'? (yes/no)"
 		decision := readAndTrimUserInput(prompt)
 
 		if decision == "yes" {
-			repo.DeleteItemById(activeItem.Id)
+			inMemory.DeleteItemById(activeItem.Id)
 			fmt.Println("To Do item deleted")
 			return // skip printing logic for deleted item
 		}
@@ -171,7 +171,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	fmt.Println("Updated item: ")
 
-	activeItem, err = repo.GetById(activeItem.Id)
+	activeItem, err = inMemory.GetById(activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
 	}

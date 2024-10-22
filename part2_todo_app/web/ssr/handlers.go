@@ -1,7 +1,7 @@
 package ssr
 
 import (
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -20,7 +20,7 @@ func handleGETViewToDoItemPage(writer http.ResponseWriter, request *http.Request
 		return
 	}
 
-	activeItem, err := repo.GetById(activeIdAsInt)
+	activeItem, err := inMemory.GetById(activeIdAsInt)
 	if err != nil {
 		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
@@ -30,7 +30,7 @@ func handleGETViewToDoItemPage(writer http.ResponseWriter, request *http.Request
 }
 
 func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
-	getTemplateAndExecute("viewAll.gohtml", writer, repo.GetAll())
+	getTemplateAndExecute("viewAll.gohtml", writer, inMemory.GetAll())
 }
 
 func handleGETCreateToDoItemPage(writer http.ResponseWriter, request *http.Request) {
@@ -46,7 +46,7 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 		return
 	}
 
-	activeItem, err := repo.GetById(activeIdAsInt)
+	activeItem, err := inMemory.GetById(activeIdAsInt)
 	if err != nil {
 		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return

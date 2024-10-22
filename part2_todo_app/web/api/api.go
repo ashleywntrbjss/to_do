@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
 const ServerAddress = "localhost:8085"
@@ -33,10 +31,10 @@ func middleware(existingHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println(request.Method, request.URL.Path)
 
-		ctx, cancel := context.WithTimeout(request.Context(), 5*time.Second)
-		defer cancel()
-
-		request = request.WithContext(ctx)
+		//ctx, cancel := context.WithTimeout(request.Context(), 5*time.Second)
+		//defer cancel()
+		//
+		//request = request.WithContext(ctx)
 
 		writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")

@@ -1,4 +1,4 @@
-package repo
+package inMemory
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"

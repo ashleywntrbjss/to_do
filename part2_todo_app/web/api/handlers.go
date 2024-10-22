@@ -1,7 +1,7 @@
 package api
 
 import (
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"fmt"
 	"net/http"
@@ -18,7 +18,7 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	responseItem, err := repo.GetById(activeIdAsInt)
+	responseItem, err := inMemory.GetById(activeIdAsInt)
 
 	if err != nil {
 		fmt.Println("error getting item:", err)
@@ -30,7 +30,7 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
-	encodeJson(writer, repo.GetAll())
+	encodeJson(writer, inMemory.GetAll())
 }
 
 func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
@@ -50,7 +50,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	newItemIndex, err := repo.AddNew(toDo)
+	newItemIndex, err := inMemory.AddNew(toDo)
 	if err != nil {
 		fmt.Println("error adding new item:", err)
 		http.Error(writer, "error saving new to do item", http.StatusBadRequest)
@@ -84,7 +84,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	_, err = repo.GetById(toDo.Id)
+	_, err = inMemory.GetById(toDo.Id)
 
 	if err != nil {
 		fmt.Println("Validation failed: failed to retrieve existing to do item")
@@ -92,7 +92,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = repo.UpdateItemTitleById(toDo.Title, toDo.Id)
+	err = inMemory.UpdateItemTitleById(toDo.Title, toDo.Id)
 
 	if err != nil {
 		fmt.Println("Failed to update item:", err)
@@ -100,7 +100,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	err = repo.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
+	err = inMemory.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
 
 	if err != nil {
 		fmt.Println("Failed to update item:", err)

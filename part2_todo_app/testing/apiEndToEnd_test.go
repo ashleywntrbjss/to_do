@@ -82,14 +82,14 @@ func TestStressApi(t *testing.T) {
 
 	var wait = new(sync.WaitGroup)
 
-	for i := range 500 {
+	for i := range 5000 {
 		wait.Add(2)
 		go viewItemRequest(serverAddress, 1, wait, t)
 
 		if i%2 == 0 {
 			editItem := todoitem.ToDoItem{
 				Id:         1,
-				Title:      "Washing up",
+				Title:      "do the ironing",
 				IsComplete: true,
 			}
 			go editItemRequest(serverAddress, editItem, wait, t)
