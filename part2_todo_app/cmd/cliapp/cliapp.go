@@ -3,7 +3,6 @@ package cliapp
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/cmd/menu"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
 	"fmt"
@@ -19,9 +18,9 @@ var reader = bufio.NewReader(os.Stdin)
 
 var activeRepo repo.Repo
 
-func RunCli() {
+func RunCli(repo repo.Repo) {
 
-	activeRepo = new(inMemory.InMemory)
+	activeRepo = repo
 
 	if activeRepo == nil {
 		panic(" repo not initalised ")

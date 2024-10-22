@@ -2,7 +2,6 @@ package api
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,10 +15,10 @@ const ServerAddress = "localhost:8085"
 
 var activeRepo repo.Repo
 
-func ListenAndServe() {
+func ListenAndServe(repo repo.Repo) {
 	mux := http.NewServeMux()
 
-	activeRepo = new(inMemory.InMemory)
+	activeRepo = repo
 
 	if activeRepo == nil {
 		panic("no active repo")
