@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"fmt"
@@ -8,7 +9,7 @@ import (
 	"strconv"
 )
 
-func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
+func handleGETToDoItem(writer http.ResponseWriter, request *http.Request, repo repo.repo) {
 	activeId := request.PathValue("itemId")
 	activeIdAsInt, err := strconv.Atoi(activeId)
 
