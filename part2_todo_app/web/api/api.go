@@ -14,12 +14,16 @@ import (
 
 const ServerAddress = "localhost:8085"
 
+var activeRepo repo.Repo
+
 func ListenAndServe() {
 	mux := http.NewServeMux()
 
-	var activeRepo repo.Repo
-
 	activeRepo = new(inMemory.InMemory)
+
+	if activeRepo == nil {
+		panic("no active repo")
+	}
 
 	mux.HandleFunc("GET /api/get/{itemId}", handleGETToDoItem)
 	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItems)

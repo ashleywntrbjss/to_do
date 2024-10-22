@@ -1,14 +1,13 @@
 package api
 
 import (
-	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"fmt"
 	"net/http"
 	"strconv"
 )
 
-func handleGETToDoItem(writer http.ResponseWriter, request *http.Request, repo repo.Repo) {
+func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 	activeIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
 
 	if err != nil {
@@ -17,7 +16,7 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request, repo r
 		return
 	}
 
-	responseItem, err := repo.GetById(activeIdAsInt)
+	responseItem, err := activeRepo.GetById(activeIdAsInt)
 
 	if err != nil {
 		fmt.Println("error getting item:", err)
@@ -28,11 +27,11 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request, repo r
 	encodeJson(writer, responseItem)
 }
 
-func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request, repo repo.Repo) {
-	encodeJson(writer, repo.GetAll())
+func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
+	encodeJson(writer, activeRepo.GetAll())
 }
 
-func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request, repo repo.Repo) {
+func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
@@ -49,7 +48,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request,
 		return
 	}
 
-	newItemIndex, err := repo.AddNew(toDo)
+	newItemIndex, err := activeRepo.AddNew(toDo)
 	if err != nil {
 		fmt.Println("error adding new item:", err)
 		http.Error(writer, "error saving new to do item", http.StatusBadRequest)
@@ -66,7 +65,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request,
 	}
 }
 
-func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request, repo repo.Repo) {
+func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
@@ -83,7 +82,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request, re
 		return
 	}
 
-	_, err = repo.GetById(toDo.Id)
+	_, err = activeRepo.GetById(toDo.Id)
 
 	if err != nil {
 		fmt.Println("Validation failed: failed to retrieve existing to do item")
@@ -91,7 +90,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request, re
 		return
 	}
 
-	err = repo.UpdateItemTitleById(toDo.Title, toDo.Id)
+	err = activeRepo.UpdateItemTitleById(toDo.Title, toDo.Id)
 
 	if err != nil {
 		fmt.Println("Failed to update item:", err)
@@ -99,7 +98,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request, re
 		return
 	}
 
-	err = repo.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
+	err = activeRepo.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
 
 	if err != nil {
 		fmt.Println("Failed to update item:", err)
