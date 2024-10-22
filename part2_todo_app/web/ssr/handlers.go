@@ -1,6 +1,7 @@
 package ssr
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -29,7 +30,13 @@ func handleGETViewToDoItemPage(writer http.ResponseWriter, request *http.Request
 }
 
 func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Request) {
-	getTemplateAndExecute("viewAll.gohtml", writer, activeRepo.GetAll())
+	items, err := activeRepo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "items not found", http.StatusNotFound)
+		return
+	}
+	getTemplateAndExecute("viewAll.gohtml", writer, items)
 }
 
 func handleGETCreateToDoItemPage(writer http.ResponseWriter, request *http.Request) {

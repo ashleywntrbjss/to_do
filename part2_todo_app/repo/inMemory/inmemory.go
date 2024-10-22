@@ -12,7 +12,7 @@ type InMemory struct {
 	lock  sync.RWMutex
 }
 
-func (r *InMemory) CreateItemFromTitle(title string) todoitem.ToDoItem {
+func (r *InMemory) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -20,7 +20,7 @@ func (r *InMemory) CreateItemFromTitle(title string) todoitem.ToDoItem {
 	newItem.Id = r.newIndex()
 	r.store = append(r.store, newItem)
 
-	return newItem
+	return newItem, nil
 }
 
 func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
@@ -58,10 +58,10 @@ func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
 	return returnItem, nil
 }
 
-func (r *InMemory) GetAll() []todoitem.ToDoItem {
+func (r *InMemory) GetAll() ([]todoitem.ToDoItem, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.store
+	return r.store, nil
 }
 
 func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {

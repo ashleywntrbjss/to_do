@@ -13,7 +13,7 @@ func TestAddItemFromTitle(t *testing.T) {
 	}
 
 	title := "Task 1"
-	item := testRepo.CreateItemFromTitle(title)
+	item, _ := testRepo.CreateItemFromTitle(title)
 
 	if len(testRepo.store) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(testRepo.store))

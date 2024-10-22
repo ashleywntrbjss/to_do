@@ -80,7 +80,7 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem := activeRepo.CreateItemFromTitle(itemName)
+	newItem, _ := activeRepo.CreateItemFromTitle(itemName)
 
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
@@ -91,14 +91,26 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	todoitem.PrettyPrintToDoItems(activeRepo.GetAll()...)
+	items, err := activeRepo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	todoitem.PrettyPrintToDoItems(items...)
 	pauseForInput()
 }
 
 func handleEditItem() {
 	printDecoratedTitle("Edit To Do items")
 
-	todoitem.PrettyPrintToDoItems(activeRepo.GetAll()...)
+	items, err := activeRepo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	todoitem.PrettyPrintToDoItems(items...)
 
 	userInput := readAndTrimUserInput("Provide the Id of the item to edit")
 

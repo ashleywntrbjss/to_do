@@ -28,7 +28,14 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 }
 
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
-	encodeJson(writer, activeRepo.GetAll())
+	items, err := activeRepo.GetAll()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(writer, "items not found", http.StatusNotFound)
+		return
+	}
+
+	encodeJson(writer, items)
 }
 
 func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {

@@ -4,6 +4,7 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/cmd/cliapp"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/sql"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/api"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/ssr"
 	"flag"
@@ -19,12 +20,13 @@ func main() {
 	var sharedStore repo.Repo
 
 	flag.StringVar(&repoType, "r", "memory", "type of repository")
+	flag.Parse()
 
 	switch repoType {
 	case "memory":
 		sharedStore = new(inMemory.InMemory)
-	case "postgres":
-		panic("postgres not yet supported")
+	case "sql":
+		sharedStore = new(sql.PostgresStore)
 	default:
 		sharedStore = new(inMemory.InMemory)
 	}
