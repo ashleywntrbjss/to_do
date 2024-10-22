@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +16,10 @@ const ServerAddress = "localhost:8085"
 
 func ListenAndServe() {
 	mux := http.NewServeMux()
+
+	var activeRepo repo.Repo
+
+	activeRepo = new(inMemory.InMemory)
 
 	mux.HandleFunc("GET /api/get/{itemId}", handleGETToDoItem)
 	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItems)

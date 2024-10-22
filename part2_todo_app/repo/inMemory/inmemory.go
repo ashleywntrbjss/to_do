@@ -7,104 +7,104 @@ import (
 	"sync"
 )
 
-var toDoItemRepo = []todoitem.ToDoItem{
-	{Id: 1, Title: "Washing up", IsComplete: true},
-	{Id: 2, Title: "Ironing", IsComplete: false},
+type InMemory struct {
+	store []todoitem.ToDoItem
 }
 
 var repoLock = sync.Mutex{}
 
-func CreateItemFromTitle(title string) todoitem.ToDoItem {
+func (r *InMemory) CreateItemFromTitle(title string) todoitem.ToDoItem {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
 	newItem := todoitem.NewToDoItem(title)
-	newItem.Id = newIndex()
-	toDoItemRepo = append(toDoItemRepo, newItem)
+	newItem.Id = r.newIndex()
+	r.store = append(r.store, newItem)
 
 	return newItem
 }
 
-func AddNew(item todoitem.ToDoItem) (int, error) {
+func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	item.Id = newIndex()
+	item.Id = r.newIndex()
 
-	_, isFound := findIndexById(item.Id)
+	_, isFound := r.findIndexById(item.Id)
 
 	if isFound {
 		fmt.Println("Item already exists")
 		return -1, errors.New("item already exists")
 	}
 
-	toDoItemRepo = append(toDoItemRepo, item)
+	r.store = append(r.store, item)
 
 	fmt.Println("Created new item", item)
 
 	return item.Id, nil
 }
 
-func GetById(itemId int) (todoitem.ToDoItem, error) {
+func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	index, isFound := findIndexById(itemId)
+	index, isFound := r.findIndexById(itemId)
 
 	if !isFound {
 		return todoitem.ToDoItem{}, errors.New("cannot find item by provided id")
 	}
 
-	returnItem := toDoItemRepo[index]
+	returnItem := r.store[index]
 
 	return returnItem, nil
 }
 
-func GetAll() []todoitem.ToDoItem {
-	return toDoItemRepo
+func (r *InMemory) GetAll() []todoitem.ToDoItem {
+	return r.store
 }
 
-func UpdateItemTitleById(newTitle string, itemId int) error {
+func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	index, isFound := findIndexById(itemId)
+	index, isFound := r.findIndexById(itemId)
 	if !isFound {
 		return errors.New("cannot find item by provided id")
 	}
 
-	toDoItemRepo[index].Title = newTitle
+	r.store[index].Title = newTitle
 	return nil
 }
 
-func UpdateItemCompletionStatusById(completionStatus bool, itemId int) error {
+func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId int) error {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	index, isFound := findIndexById(itemId)
+	index, isFound := r.findIndexById(itemId)
 	if !isFound {
 		fmt.Println("item not found")
 		return errors.New("item not found")
 	}
 
-	toDoItemRepo[index].IsComplete = completionStatus
+	r.store[index].IsComplete = completionStatus
 	return nil
 }
 
-func DeleteItemById(itemId int) {
+func (r *InMemory) DeleteItemById(itemId int) error {
 	repoLock.Lock()
 	defer repoLock.Unlock()
 
-	index, isFound := findIndexById(itemId)
+	index, isFound := r.findIndexById(itemId)
 	if !isFound {
-		return
+		return errors.New("unable to find item to delete")
 	}
 
-	toDoItemRepo = append(toDoItemRepo[:index], toDoItemRepo[index+1:]...)
+	r.store = append(r.store[:index], r.store[index+1:]...)
+	return nil
 }
 
-func findIndexById(id int) (int, bool) {
-	for index, item := range toDoItemRepo {
+func (r *InMemory) findIndexById(id int) (int, bool) {
+	for index, item := range r.store {
 		if item.Id == id {
 			return index, true
 		}
@@ -112,6 +112,6 @@ func findIndexById(id int) (int, bool) {
 	return -1, false
 }
 
-func newIndex() int {
-	return len(toDoItemRepo) + 1 // simple ID generation
+func (r *InMemory) newIndex() int {
+	return len(r.store) + 1 // simple ID generation
 }
