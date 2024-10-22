@@ -1,6 +1,8 @@
 package ssr
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"errors"
 	"fmt"
 	"html/template"
@@ -10,8 +12,12 @@ import (
 	"path/filepath"
 )
 
+var activeRepo repo.Repo
+
 func ListenAndServe() {
 	mux := http.NewServeMux()
+
+	activeRepo = new(inMemory.InMemory)
 
 	mux.HandleFunc("GET /view/{itemId}", handleGETViewToDoItemPage)
 	mux.HandleFunc("GET /view-all", handleGETViewAllToDoItemsPage)

@@ -2,6 +2,7 @@ package cliapp
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/cmd/menu"
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
@@ -16,7 +17,16 @@ var ConsoleDecorateLine = "================================"
 
 var reader = bufio.NewReader(os.Stdin)
 
+var activeRepo repo.Repo
+
 func RunCli() {
+
+	activeRepo = new(inMemory.InMemory)
+
+	if activeRepo == nil {
+		panic(" repo not initalised ")
+	}
+
 	printDecoratedTitle("Welcome to the To Do application")
 	for {
 		runMainMenu()
@@ -71,7 +81,7 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem := inMemory.CreateItemFromTitle(itemName)
+	newItem := activeRepo.CreateItemFromTitle(itemName)
 
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
@@ -82,14 +92,14 @@ func handleCreateNewItem() {
 
 func handleViewItem() {
 	printDecoratedTitle("View To Do items")
-	todoitem.PrettyPrintToDoItems(inMemory.GetAll()...)
+	todoitem.PrettyPrintToDoItems(activeRepo.GetAll()...)
 	pauseForInput()
 }
 
 func handleEditItem() {
 	printDecoratedTitle("Edit To Do items")
 
-	todoitem.PrettyPrintToDoItems(inMemory.GetAll()...)
+	todoitem.PrettyPrintToDoItems(activeRepo.GetAll()...)
 
 	userInput := readAndTrimUserInput("Provide the Id of the item to edit")
 
@@ -99,7 +109,7 @@ func handleEditItem() {
 		return
 	}
 
-	activeItem, err := inMemory.GetById(userInputAsInt)
+	activeItem, err := activeRepo.GetById(userInputAsInt)
 
 	if err != nil {
 		fmt.Println("Unable to retrieve item from repo", err)
@@ -146,17 +156,17 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	switch editSelectionKey {
 	case "markCompletionStatus":
-		inMemory.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
+		activeRepo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
 	case "updateTitle":
 		prompt := "Provide new title for item: '" + activeItem.Title + "'"
 		newTitle := readAndTrimUserInput(prompt)
-		inMemory.UpdateItemTitleById(newTitle, activeItem.Id)
+		activeRepo.UpdateItemTitleById(newTitle, activeItem.Id)
 	case "deleteItem":
 		prompt := "Are you sure you wish to delete: '" + activeItem.Title + "'? (yes/no)"
 		decision := readAndTrimUserInput(prompt)
 
 		if decision == "yes" {
-			inMemory.DeleteItemById(activeItem.Id)
+			activeRepo.DeleteItemById(activeItem.Id)
 			fmt.Println("To Do item deleted")
 			return // skip printing logic for deleted item
 		}
@@ -171,7 +181,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	fmt.Println("Updated item: ")
 
-	activeItem, err = inMemory.GetById(activeItem.Id)
+	activeItem, err = activeRepo.GetById(activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
 	}
