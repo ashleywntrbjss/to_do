@@ -10,6 +10,14 @@ type PostgresStore struct {
 	db *pg.DB
 }
 
+func (r *PostgresStore) InitDB() {
+	r.db = pg.Connect(&pg.Options{
+		Addr:     "localhost:5432",
+		User:     "postgres",
+		Password: "1234",
+	})
+}
+
 func (r *PostgresStore) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
 	newItem := todoitem.NewToDoItem(title)
 	_, err := r.db.Model(newItem).Insert()

@@ -26,7 +26,10 @@ func main() {
 	case "memory":
 		sharedStore = new(inMemory.InMemory)
 	case "sql":
-		sharedStore = new(sql.PostgresStore)
+		dbStore := new(sql.PostgresStore)
+		dbStore.InitDB()
+
+		sharedStore = dbStore
 	default:
 		sharedStore = new(inMemory.InMemory)
 	}
