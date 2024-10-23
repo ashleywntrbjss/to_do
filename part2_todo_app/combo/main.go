@@ -17,19 +17,28 @@ import (
 func main() {
 
 	var repoType string
+
+	var connectionString string
+
 	var sharedStore repo.Repo
 
 	flag.StringVar(&repoType, "r", "memory", "type of repository")
+	flag.StringVar(&connectionString, "cs", "", "connection string for postgres db")
+
 	flag.Parse()
 
 	switch repoType {
 	case "memory":
 		sharedStore = new(inMemory.InMemory)
 	case "sql":
+		if connectionString == "" {
+			panic("connectionString is required")
+		}
+
 		dbStore := new(sql.PostgresStore)
-		err := dbStore.InitDB()
+		err := dbStore.InitDB(connectionString)
 		if err != nil {
-			panic(err)
+			panic(err.Error())
 		}
 
 		sharedStore = dbStore

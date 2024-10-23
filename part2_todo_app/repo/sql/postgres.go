@@ -12,14 +12,15 @@ type PostgresStore struct {
 	db *pg.DB
 }
 
-func (r *PostgresStore) InitDB() error {
-	r.db = pg.Connect(&pg.Options{
-		Addr:     "localhost:5432",
-		User:     "postgres",
-		Password: "1234",
-	})
+func (r *PostgresStore) InitDB(connectionString string) error {
+	opt, err := pg.ParseURL(connectionString)
+	if err != nil {
+		return err
+	}
 
-	err := createSchema(r.db)
+	r.db = pg.Connect(opt)
+
+	err = createSchema(r.db)
 	if err != nil {
 		return err
 	}
