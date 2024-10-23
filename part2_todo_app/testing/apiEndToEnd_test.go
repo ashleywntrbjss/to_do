@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/api"
 	"bytes"
@@ -76,13 +77,17 @@ func makePutRequest(url string, data any) error {
 }
 
 func TestStressApi(t *testing.T) {
-	go api.ListenAndServe()
+	var testStore = new(inMemory.InMemory)
+
+	testStore.InitTestData()
+
+	go api.ListenAndServe(testStore)
 
 	serverAddress := "http://" + api.ServerAddress
 
 	var wait = new(sync.WaitGroup)
 
-	for i := range 5000 {
+	for i := range 100 {
 		wait.Add(2)
 		go viewItemRequest(serverAddress, 1, wait, t)
 

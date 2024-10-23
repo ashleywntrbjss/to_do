@@ -12,6 +12,21 @@ type InMemory struct {
 	lock  sync.RWMutex
 }
 
+func (r *InMemory) InitTestData() {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.store = append(r.store, todoitem.ToDoItem{
+		Id:         1,
+		Title:      "Washing up",
+		IsComplete: false,
+	}, todoitem.ToDoItem{
+		Id:         2,
+		Title:      "Walk the dog",
+		IsComplete: true,
+	})
+}
+
 func (r *InMemory) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
