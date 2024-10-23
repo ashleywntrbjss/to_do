@@ -6,10 +6,11 @@
     </head>
     <Body>
     <h2>To Do items</h2>
-    <div style="max-width: 300px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 50px">
     {{range .}}
         <div class="toDoItem">
 
+        <Button id="toDoUpdateStatus">
 
         {{if .IsComplete}}
             <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,8 +29,10 @@
                       fill="#000000"/>
             </svg>
             {{end}}
-            <h3 style="margin:unset;padding: unset;">{{.Title}}</h3>
-            <div style="margin-left: auto">
+        </Button>
+
+            <h3 style="margin: 5px;">{{.Title}}</h3>
+            <div style="width: fit-content;">
                 <a href="/view/{{.Id}}">View</a>
                 <a href="/edit/{{.Id}}">Edit</a>
             </div>
