@@ -27,7 +27,10 @@ func main() {
 		sharedStore = new(inMemory.InMemory)
 	case "sql":
 		dbStore := new(sql.PostgresStore)
-		dbStore.InitDB()
+		err := dbStore.InitDB()
+		if err != nil {
+			panic(err)
+		}
 
 		sharedStore = dbStore
 	default:

@@ -3,9 +3,10 @@ package todoitem
 import "fmt"
 
 type ToDoItem struct {
-	Id         int    `json:"id"`
-	Title      string `json:"title"`
-	IsComplete bool   `json:"isComplete"`
+	tableName  struct{} `pg:"to_do_items"`
+	Id         int      `json:"id"`
+	Title      string   `json:"title"`
+	IsComplete bool     `json:"isComplete"`
 }
 
 func NewToDoItem(title string) ToDoItem {

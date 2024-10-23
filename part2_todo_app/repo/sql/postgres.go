@@ -4,18 +4,38 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"errors"
 	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 )
 
 type PostgresStore struct {
 	db *pg.DB
 }
 
-func (r *PostgresStore) InitDB() {
+func (r *PostgresStore) InitDB() error {
 	r.db = pg.Connect(&pg.Options{
 		Addr:     "localhost:5432",
 		User:     "postgres",
 		Password: "1234",
 	})
+
+	err := createSchema(r.db)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createSchema(db *pg.DB) error {
+	models := []interface{}{
+		(*todoitem.ToDoItem)(nil),
+	}
+	for _, model := range models {
+		err := db.Model(model).CreateTable(&orm.CreateTableOptions{Temp: false, IfNotExists: true})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *PostgresStore) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
