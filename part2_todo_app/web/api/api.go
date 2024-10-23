@@ -2,6 +2,9 @@ package api
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const ServerAddress = "localhost:8085"
@@ -40,12 +44,13 @@ func ListenAndServe(repo repo.Repo) {
 
 func middleware(existingHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println(request.Method, request.URL.Path)
+		requestId := generateRequestID()
+		ctx := context.WithValue(request.Context(), "requestId", requestId)
 
-		//ctx, cancel := context.WithTimeout(request.Context(), 5*time.Second)
-		//defer cancel()
-		//
-		//request = request.WithContext(ctx)
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		request = request.WithContext(ctx)
 
 		writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
@@ -138,3 +143,11 @@ func decodeJSONBody(writer http.ResponseWriter, request *http.Request, decodeTar
 }
 
 // sample decoder credit Alex Edwards blog
+
+func generateRequestID() string {
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(bytes)
+}
