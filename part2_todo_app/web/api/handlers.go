@@ -113,3 +113,21 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 }
+
+func handleDELETEToDoItem(writer http.ResponseWriter, request *http.Request) {
+	activeIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
+
+	if err != nil {
+		fmt.Println("error converting activeId to int:", err)
+		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
+		return
+	}
+
+	err = activeRepo.DeleteItemById(activeIdAsInt)
+
+	if err != nil {
+		fmt.Println("error deleting item:", err)
+		http.NotFound(writer, request)
+		return
+	}
+}

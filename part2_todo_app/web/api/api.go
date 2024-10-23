@@ -28,6 +28,7 @@ func ListenAndServe(repo repo.Repo) {
 	mux.HandleFunc("GET /api/get-all", handleGETAllToDoItems)
 	mux.HandleFunc("POST /api/create", handlePOSTCreateToDoItem)
 	mux.HandleFunc("PUT /api/edit", handlePUTEditToDoItem)
+	mux.HandleFunc("DELETE /api/delete/{itemId}", handleDELETEToDoItem)
 
 	fmt.Println("Starting api server at http://" + ServerAddress)
 	err := http.ListenAndServe(ServerAddress, middleware(mux))
