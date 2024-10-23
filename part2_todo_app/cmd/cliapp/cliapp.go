@@ -86,7 +86,7 @@ func handleCreateNewItem() {
 		fmt.Println("error adding item", err)
 	}
 
-	fmt.Printf("Added your item:")
+	fmt.Println("Added your item:")
 	newItem.PrettyPrintToDoItem()
 	fmt.Println()
 
