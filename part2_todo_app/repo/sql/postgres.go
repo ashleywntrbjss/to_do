@@ -72,7 +72,7 @@ func (r *PostgresStore) GetById(itemId int) (todoitem.ToDoItem, error) {
 
 func (r *PostgresStore) GetAll() ([]todoitem.ToDoItem, error) {
 	var items []todoitem.ToDoItem
-	err := r.db.Model(&items).Select()
+	err := r.db.Model(&items).Order("id DESC").Select()
 	if err != nil {
 		return nil, err
 	}
