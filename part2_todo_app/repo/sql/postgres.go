@@ -2,7 +2,6 @@ package sql
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
-	"errors"
 	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
@@ -43,6 +42,7 @@ func createSchema(db *pg.DB) error {
 func (r *PostgresStore) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
 	newItem := todoitem.NewToDoItem(title)
 	result, err := r.db.Model(&newItem).Insert()
+
 	if err != nil {
 		return todoitem.ToDoItem{}, err
 	}
@@ -62,9 +62,6 @@ func (r *PostgresStore) GetById(itemId int) (todoitem.ToDoItem, error) {
 	var item todoitem.ToDoItem
 	err := r.db.Model(&item).Where("id = ?", itemId).Select()
 	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			return todoitem.ToDoItem{}, errors.New("cannot find item by provided id")
-		}
 		return todoitem.ToDoItem{}, err
 	}
 	fmt.Println("Found item by id:", item)

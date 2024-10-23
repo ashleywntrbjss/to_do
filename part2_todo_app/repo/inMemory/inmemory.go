@@ -7,6 +7,11 @@ import (
 	"sync"
 )
 
+var (
+	NotFoundError      = errors.New("entity not found")
+	AlreadyExistsError = errors.New("entity already exists")
+)
+
 type InMemory struct {
 	store []todoitem.ToDoItem
 	lock  sync.RWMutex
@@ -48,7 +53,7 @@ func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
 
 	if isFound {
 		fmt.Println("Item already exists")
-		return -1, errors.New("item already exists")
+		return -1, AlreadyExistsError
 	}
 
 	r.store = append(r.store, item)
@@ -65,7 +70,7 @@ func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
 	index, isFound := r.findIndexById(itemId)
 
 	if !isFound {
-		return todoitem.ToDoItem{}, errors.New("cannot find item by provided id")
+		return todoitem.ToDoItem{}, NotFoundError
 	}
 
 	returnItem := r.store[index]
@@ -85,7 +90,7 @@ func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
-		return errors.New("cannot find item by provided id")
+		return NotFoundError
 	}
 
 	r.store[index].Title = newTitle
@@ -99,7 +104,7 @@ func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
 		fmt.Println("item not found")
-		return errors.New("item not found")
+		return NotFoundError
 	}
 
 	r.store[index].IsComplete = completionStatus
@@ -112,7 +117,7 @@ func (r *InMemory) DeleteItemById(itemId int) error {
 
 	index, isFound := r.findIndexById(itemId)
 	if !isFound {
-		return errors.New("unable to find item to delete")
+		return NotFoundError
 	}
 
 	r.store = append(r.store[:index], r.store[index+1:]...)

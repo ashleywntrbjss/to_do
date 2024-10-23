@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
+	"errors"
 	"fmt"
+	"github.com/go-pg/pg/v10"
 	"net/http"
 	"strconv"
 )
@@ -19,8 +22,16 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 	responseItem, err := activeRepo.GetById(activeIdAsInt)
 
 	if err != nil {
-		fmt.Println("error getting item:", err)
-		http.NotFound(writer, request)
+
+		fmt.Println("error getting item:", err.Error())
+
+		if errors.Is(err, pg.ErrNoRows) || errors.Is(err, inMemory.NotFoundError) {
+			http.NotFound(writer, request)
+			return
+		}
+
+		http.Error(writer, "internal server error", http.StatusInternalServerError)
+
 		return
 	}
 
@@ -30,9 +41,14 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
 	items, err := activeRepo.GetAll()
 	if err != nil {
-		fmt.Println(err)
-		http.Error(writer, "items not found", http.StatusNotFound)
-		return
+		fmt.Println("failed to get all to do items", err.Error())
+
+		if errors.Is(err, pg.ErrNoRows) || errors.Is(err, inMemory.NotFoundError) {
+			http.Error(writer, "items not found", http.StatusNotFound)
+			return
+		}
+
+		http.Error(writer, "internal server error", http.StatusInternalServerError)
 	}
 
 	encodeJson(writer, items)
@@ -76,7 +92,6 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
-
 	if err != nil {
 		fmt.Println("error decoding request body:", err)
 		http.Error(writer, "error decoding request content", http.StatusBadRequest)
@@ -93,7 +108,7 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		fmt.Println("Validation failed: failed to retrieve existing to do item")
-		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
+		http.Error(writer, "validation failed: failed to retrieve existing to do item", http.StatusBadRequest)
 		return
 	}
 
@@ -152,7 +167,14 @@ func handleDELETEToDoItem(writer http.ResponseWriter, request *http.Request) {
 	err = activeRepo.DeleteItemById(activeIdAsInt)
 
 	if err != nil {
-		fmt.Println("error deleting item:", err)
+
+		fmt.Println("error deleting item:", err.Error())
+
+		if errors.Is(err, pg.ErrNoRows) || errors.Is(err, inMemory.NotFoundError) {
+			http.Error(writer, "item not found", http.StatusNotFound)
+			return
+		}
+
 		http.Error(writer, "failed to delete item", http.StatusInternalServerError)
 		return
 	}
