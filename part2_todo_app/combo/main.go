@@ -16,6 +16,30 @@ import (
 
 func main() {
 
+	sharedStore := initRepo()
+
+	go cliapp.RunCli(sharedStore)
+	go ssr.ListenAndServe(sharedStore)
+	go api.ListenAndServe(sharedStore)
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	doneChan := make(chan bool, 1)
+
+	go func() {
+		<-signalChan
+		fmt.Println("\nReceived an interrupt, performing cleanup...")
+		// Perform any cleanup here
+		doneChan <- true
+	}()
+
+	fmt.Println("Press Ctrl+C to exit")
+	<-doneChan
+	fmt.Println("Cleanup complete, exiting.")
+}
+
+func initRepo() repo.Repo {
 	var repoType string
 
 	var connectionString string
@@ -45,24 +69,5 @@ func main() {
 	default:
 		sharedStore = new(inMemory.InMemory)
 	}
-
-	go cliapp.RunCli(sharedStore)
-	go ssr.ListenAndServe(sharedStore)
-	go api.ListenAndServe(sharedStore)
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-
-	doneChan := make(chan bool, 1)
-
-	go func() {
-		<-signalChan
-		fmt.Println("\nReceived an interrupt, performing cleanup...")
-		// Perform any cleanup here
-		doneChan <- true
-	}()
-
-	fmt.Println("Press Ctrl+C to exit")
-	<-doneChan
-	fmt.Println("Cleanup complete, exiting.")
+	return sharedStore
 }
