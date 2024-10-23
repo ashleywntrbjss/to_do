@@ -80,7 +80,11 @@ func handleCreateNewItem() {
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem, _ := activeRepo.CreateItemFromTitle(itemName)
+	newItem, err := activeRepo.CreateItemFromTitle(itemName)
+
+	if err != nil {
+		fmt.Println("error adding item", err)
+	}
 
 	fmt.Printf("Added your item:")
 	newItem.PrettyPrintToDoItem()
@@ -167,17 +171,27 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	switch editSelectionKey {
 	case "markCompletionStatus":
-		activeRepo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
+		err := activeRepo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
+		if err != nil {
+			return
+		}
+
 	case "updateTitle":
 		prompt := "Provide new title for item: '" + activeItem.Title + "'"
 		newTitle := readAndTrimUserInput(prompt)
-		activeRepo.UpdateItemTitleById(newTitle, activeItem.Id)
+		err := activeRepo.UpdateItemTitleById(newTitle, activeItem.Id)
+		if err != nil {
+			return
+		}
 	case "deleteItem":
 		prompt := "Are you sure you wish to delete: '" + activeItem.Title + "'? (yes/no)"
 		decision := readAndTrimUserInput(prompt)
 
 		if decision == "yes" {
-			activeRepo.DeleteItemById(activeItem.Id)
+			err := activeRepo.DeleteItemById(activeItem.Id)
+			if err != nil {
+				return
+			}
 			fmt.Println("To Do item deleted")
 			return // skip printing logic for deleted item
 		}
