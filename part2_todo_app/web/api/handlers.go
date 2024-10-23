@@ -58,7 +58,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 	newItemIndex, err := activeRepo.AddNew(toDo)
 	if err != nil {
 		fmt.Println("error adding new item:", err)
-		http.Error(writer, "error saving new to do item", http.StatusBadRequest)
+		http.Error(writer, "failed to save new to do item", http.StatusInternalServerError)
 		return
 	}
 
@@ -67,7 +67,7 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 	_, err = writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
 	if err != nil {
 		fmt.Println("error writing response:", err)
-		http.Error(writer, err.Error(), http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
@@ -109,9 +109,35 @@ func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		fmt.Println("Failed to update item:", err)
-		http.Error(writer, "failed to update to do item title", http.StatusBadRequest)
+		http.Error(writer, "failed to update to do item title", http.StatusInternalServerError)
 		return
 	}
+}
+
+func handlePATCHToggleComplete(writer http.ResponseWriter, request *http.Request) {
+	requestIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
+
+	if err != nil {
+		fmt.Println("error converting activeId to int:", err)
+		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
+		return
+	}
+
+	requestItem, err := activeRepo.GetById(requestIdAsInt)
+
+	if err != nil {
+		fmt.Println("Validation failed: failed to retrieve existing to do item")
+		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
+		return
+	}
+
+	err = activeRepo.UpdateItemCompletionStatusById(!requestItem.IsComplete, requestItem.Id)
+	if err != nil {
+		fmt.Println("failed to update item completion status")
+		http.Error(writer, "failed to update item completion status", http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func handleDELETEToDoItem(writer http.ResponseWriter, request *http.Request) {
@@ -127,7 +153,7 @@ func handleDELETEToDoItem(writer http.ResponseWriter, request *http.Request) {
 
 	if err != nil {
 		fmt.Println("error deleting item:", err)
-		http.NotFound(writer, request)
+		http.Error(writer, "failed to delete item", http.StatusInternalServerError)
 		return
 	}
 }
