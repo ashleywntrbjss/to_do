@@ -2,7 +2,16 @@
 
 ## Running
 
-Please use the main.go file in the `runall` dir to run all aspects of the application.
+Please use the main.go file in the `runall` dir to run all aspects of the application, although you will need to run it from the root `to_do` directory so the relative filepaths work
+
+Example
+
+Set Working directory: `~\go\src\bjss.com\ashley.winter\to_do`
+
+then
+
+Execute command: `go run part2_todo_app/runall/main.go`
+
 
 When running the application you will need to provide the `-r` parameter to select a repo type
 
