@@ -1,6 +1,7 @@
 package ssr
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"path/filepath"
@@ -65,7 +66,7 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 
 	activeItem, err := activeRepo.GetById(ctx, activeIdAsInt)
 	if err != nil {
-		slog.WarnContext(ctx, "item id not found: %v", err.Error())
+		slog.WarnContext(ctx, fmt.Sprintf("item id not found: %v", err.Error()))
 		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
 	}
