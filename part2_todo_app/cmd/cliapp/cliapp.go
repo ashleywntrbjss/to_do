@@ -5,6 +5,7 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bufio"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -18,21 +19,21 @@ var reader = bufio.NewReader(os.Stdin)
 
 var activeRepo repo.Repo
 
-func RunCli(repo repo.Repo) {
+func RunCli(ctx context.Context, repo repo.Repo) {
 
 	activeRepo = repo
 
 	if activeRepo == nil {
-		panic(" repo not initalised ")
+		panic("repo not initialised")
 	}
 
 	printDecoratedTitle("Welcome to the To Do application")
 	for {
-		runMainMenu()
+		runMainMenu(ctx)
 	}
 }
 
-func runMainMenu() {
+func runMainMenu(ctx context.Context) {
 
 	mainMenu := menu.Menu{
 		Title: "Main menu",
@@ -56,13 +57,13 @@ func runMainMenu() {
 
 	switch selectionKey {
 	case "create":
-		handleCreateNewItem()
+		handleCreateNewItem(ctx)
 
 	case "viewAll":
-		handleViewItem()
+		handleViewItem(ctx)
 
 	case "edit":
-		handleEditItem()
+		handleEditItem(ctx)
 
 	case "exit":
 		fmt.Println("Goodbye!")
@@ -74,13 +75,13 @@ func runMainMenu() {
 
 }
 
-func handleCreateNewItem() {
+func handleCreateNewItem(ctx context.Context) {
 	printDecoratedTitle("Create a new To Do item")
 
 	fmt.Println("Please input details for your new To Do item")
 	itemName := readAndTrimUserInput("Item name")
 
-	newItem, err := activeRepo.CreateItemFromTitle(itemName)
+	newItem, err := activeRepo.CreateItemFromTitle(ctx, itemName)
 
 	if err != nil {
 		fmt.Println("error adding item", err)
@@ -93,9 +94,9 @@ func handleCreateNewItem() {
 	pauseForInput()
 }
 
-func handleViewItem() {
+func handleViewItem(ctx context.Context) {
 	printDecoratedTitle("View To Do items")
-	items, err := activeRepo.GetAll()
+	items, err := activeRepo.GetAll(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -105,10 +106,10 @@ func handleViewItem() {
 	pauseForInput()
 }
 
-func handleEditItem() {
+func handleEditItem(ctx context.Context) {
 	printDecoratedTitle("Edit To Do items")
 
-	items, err := activeRepo.GetAll()
+	items, err := activeRepo.GetAll(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -124,18 +125,18 @@ func handleEditItem() {
 		return
 	}
 
-	activeItem, err := activeRepo.GetById(userInputAsInt)
+	activeItem, err := activeRepo.GetById(ctx, userInputAsInt)
 
 	if err != nil {
 		fmt.Println("Unable to retrieve item from repo", err)
 		return
 	}
 
-	handleSelectedItem(activeItem)
+	handleSelectedItem(ctx, activeItem)
 
 }
 
-func handleSelectedItem(activeItem todoitem.ToDoItem) {
+func handleSelectedItem(ctx context.Context, activeItem todoitem.ToDoItem) {
 	fmt.Println("Selected To Do Item: ")
 	activeItem.PrettyPrintToDoItem()
 
@@ -171,7 +172,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	switch editSelectionKey {
 	case "markCompletionStatus":
-		err := activeRepo.UpdateItemCompletionStatusById(!activeItem.IsComplete, activeItem.Id)
+		err := activeRepo.UpdateItemCompletionStatusById(ctx, !activeItem.IsComplete, activeItem.Id)
 		if err != nil {
 			return
 		}
@@ -179,7 +180,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 	case "updateTitle":
 		prompt := "Provide new title for item: '" + activeItem.Title + "'"
 		newTitle := readAndTrimUserInput(prompt)
-		err := activeRepo.UpdateItemTitleById(newTitle, activeItem.Id)
+		err := activeRepo.UpdateItemTitleById(ctx, newTitle, activeItem.Id)
 		if err != nil {
 			return
 		}
@@ -188,7 +189,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 		decision := readAndTrimUserInput(prompt)
 
 		if decision == "yes" {
-			err := activeRepo.DeleteItemById(activeItem.Id)
+			err := activeRepo.DeleteItemById(ctx, activeItem.Id)
 			if err != nil {
 				return
 			}
@@ -206,7 +207,7 @@ func handleSelectedItem(activeItem todoitem.ToDoItem) {
 
 	fmt.Println("Updated item: ")
 
-	activeItem, err = activeRepo.GetById(activeItem.Id)
+	activeItem, err = activeRepo.GetById(ctx, activeItem.Id)
 	if err != nil {
 		log.Fatal("Unable to retrieve recently updated item", err)
 	}

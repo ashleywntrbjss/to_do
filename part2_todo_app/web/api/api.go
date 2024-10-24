@@ -9,17 +9,18 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 )
 
+const ServerProtocol = "http://"
 const ServerAddress = "localhost:8085"
 
 var activeRepo repo.Repo
 
-func ListenAndServe(repo repo.Repo) {
+func ListenAndServe(ctx context.Context, repo repo.Repo) {
 	mux := http.NewServeMux()
 
 	activeRepo = repo
@@ -35,22 +36,24 @@ func ListenAndServe(repo repo.Repo) {
 	mux.HandleFunc("PATCH /api/toggle-complete/{itemId}", handlePATCHToggleComplete)
 	mux.HandleFunc("DELETE /api/delete/{itemId}", handleDELETEToDoItem)
 
-	fmt.Println("Starting api server at http://" + ServerAddress)
-	err := http.ListenAndServe(ServerAddress, middleware(mux))
+	slog.InfoContext(ctx, fmt.Sprintf("Server listening on %s%s", ServerProtocol, ServerAddress))
+
+	err := http.ListenAndServe(ServerAddress, middleware(ctx, mux))
 	if err != nil {
-		log.Fatalln("there's an error with the server:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("There's an error with the server: %s", err.Error()))
 	}
 }
 
-func middleware(existingHandler http.Handler) http.Handler {
+func middleware(ctx context.Context, existingHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		requestId := generateRequestID()
-		ctx := context.WithValue(request.Context(), "requestId", requestId)
 
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		handlerCtx := context.WithValue(request.Context(), "requestId", requestId)
+		handlerCtx = context.WithValue(handlerCtx, "logger", ctx.Value("logger"))
+		handlerCtx, cancel := context.WithTimeout(handlerCtx, 5*time.Second)
 		defer cancel()
 
-		request = request.WithContext(ctx)
+		request = request.WithContext(handlerCtx)
 
 		writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 		writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, PATCH")
@@ -61,14 +64,16 @@ func middleware(existingHandler http.Handler) http.Handler {
 			return
 		}
 
+		slog.InfoContext(handlerCtx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
+
 		existingHandler.ServeHTTP(writer, request)
 	})
 }
 
-func encodeJson(writer http.ResponseWriter, data any) {
+func encodeJson(ctx context.Context, writer http.ResponseWriter, data any) {
 	writer.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(writer).Encode(data); err != nil {
-		fmt.Println("error encoding json:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error encoding json: %s", err.Error()))
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }

@@ -2,6 +2,7 @@ package inMemory
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -32,7 +33,7 @@ func (r *InMemory) InitTestData() {
 	})
 }
 
-func (r *InMemory) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) {
+func (r *InMemory) CreateItemFromTitle(ctx context.Context, title string) (todoitem.ToDoItem, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -43,13 +44,13 @@ func (r *InMemory) CreateItemFromTitle(title string) (todoitem.ToDoItem, error) 
 	return newItem, nil
 }
 
-func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
+func (r *InMemory) AddNew(ctx context.Context, item todoitem.ToDoItem) (int, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
 	item.Id = r.newIndex()
 
-	_, isFound := r.findIndexById(item.Id)
+	_, isFound := r.findIndexById(ctx, item.Id)
 
 	if isFound {
 		fmt.Println("Item already exists")
@@ -63,11 +64,11 @@ func (r *InMemory) AddNew(item todoitem.ToDoItem) (int, error) {
 	return item.Id, nil
 }
 
-func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
+func (r *InMemory) GetById(ctx context.Context, itemId int) (todoitem.ToDoItem, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	index, isFound := r.findIndexById(itemId)
+	index, isFound := r.findIndexById(ctx, itemId)
 
 	if !isFound {
 		return todoitem.ToDoItem{}, NotFoundError
@@ -78,17 +79,17 @@ func (r *InMemory) GetById(itemId int) (todoitem.ToDoItem, error) {
 	return returnItem, nil
 }
 
-func (r *InMemory) GetAll() ([]todoitem.ToDoItem, error) {
+func (r *InMemory) GetAll(ctx context.Context) ([]todoitem.ToDoItem, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	return r.store, nil
 }
 
-func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
+func (r *InMemory) UpdateItemTitleById(ctx context.Context, newTitle string, itemId int) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	index, isFound := r.findIndexById(itemId)
+	index, isFound := r.findIndexById(ctx, itemId)
 	if !isFound {
 		return NotFoundError
 	}
@@ -97,11 +98,11 @@ func (r *InMemory) UpdateItemTitleById(newTitle string, itemId int) error {
 	return nil
 }
 
-func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId int) error {
+func (r *InMemory) UpdateItemCompletionStatusById(ctx context.Context, completionStatus bool, itemId int) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	index, isFound := r.findIndexById(itemId)
+	index, isFound := r.findIndexById(ctx, itemId)
 	if !isFound {
 		fmt.Println("item not found")
 		return NotFoundError
@@ -111,11 +112,11 @@ func (r *InMemory) UpdateItemCompletionStatusById(completionStatus bool, itemId 
 	return nil
 }
 
-func (r *InMemory) DeleteItemById(itemId int) error {
+func (r *InMemory) DeleteItemById(ctx context.Context, itemId int) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	index, isFound := r.findIndexById(itemId)
+	index, isFound := r.findIndexById(ctx, itemId)
 	if !isFound {
 		return NotFoundError
 	}
@@ -124,7 +125,7 @@ func (r *InMemory) DeleteItemById(itemId int) error {
 	return nil
 }
 
-func (r *InMemory) findIndexById(id int) (int, bool) {
+func (r *InMemory) findIndexById(ctx context.Context, id int) (int, bool) {
 	for index, item := range r.store {
 		if item.Id == id {
 			return index, true

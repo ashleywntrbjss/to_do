@@ -6,20 +6,23 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-pg/pg/v10"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
 
 func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
 	activeIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
 
 	if err != nil {
-		fmt.Println("error converting activeId to int:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error converting activeId to int: %s", err.Error()))
+
 		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
-	responseItem, err := activeRepo.GetById(activeIdAsInt)
+	responseItem, err := activeRepo.GetById(ctx, activeIdAsInt)
 
 	if err != nil {
 
@@ -35,13 +38,15 @@ func handleGETToDoItem(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	encodeJson(writer, responseItem)
+	encodeJson(ctx, writer, responseItem)
 }
 
 func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
-	items, err := activeRepo.GetAll()
+	ctx := request.Context()
+
+	items, err := activeRepo.GetAll(ctx)
 	if err != nil {
-		fmt.Println("failed to get all to do items", err.Error())
+		slog.ErrorContext(ctx, fmt.Sprintf("failed to get all to do items: %s", err.Error()))
 
 		if errors.Is(err, pg.ErrNoRows) || errors.Is(err, inMemory.NotFoundError) {
 			http.Error(writer, "items not found", http.StatusNotFound)
@@ -51,16 +56,17 @@ func handleGETAllToDoItems(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "internal server error", http.StatusInternalServerError)
 	}
 
-	encodeJson(writer, items)
+	encodeJson(ctx, writer, items)
 }
 
 func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
 
 	if err != nil {
-		fmt.Println("error decoding request body:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error decoding request body: %s", err.Error()))
 		http.Error(writer, "error decoding request content", http.StatusBadRequest)
 		return
 	}
@@ -71,9 +77,9 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	newItemIndex, err := activeRepo.AddNew(toDo)
+	newItemIndex, err := activeRepo.AddNew(ctx, toDo)
 	if err != nil {
-		fmt.Println("error adding new item:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error adding new item: %s", err.Error()))
 		http.Error(writer, "failed to save new to do item", http.StatusInternalServerError)
 		return
 	}
@@ -82,73 +88,79 @@ func handlePOSTCreateToDoItem(writer http.ResponseWriter, request *http.Request)
 	writer.WriteHeader(http.StatusCreated)
 	_, err = writer.Write([]byte("Item added with index: " + strconv.Itoa(newItemIndex)))
 	if err != nil {
-		fmt.Println("error writing response:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error writing response: %v", err.Error()))
+
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
 
 func handlePUTEditToDoItem(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+	slog.InfoContext(ctx, "Update to do item")
+
 	var toDo todoitem.ToDoItem
 
 	err := decodeJSONBody(writer, request, &toDo)
 	if err != nil {
-		fmt.Println("error decoding request body:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error decoding request body: %v", err.Error()))
 		http.Error(writer, "error decoding request content", http.StatusBadRequest)
 		return
 	}
 
 	if toDo.Title == "" {
-		fmt.Println("Validation failed: item must have title")
+		slog.ErrorContext(ctx, "Validation failed: item must have title")
 		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
 		return
 	}
 
-	_, err = activeRepo.GetById(toDo.Id)
+	_, err = activeRepo.GetById(ctx, toDo.Id)
 
 	if err != nil {
-		fmt.Println("Validation failed: failed to retrieve existing to do item")
+		slog.ErrorContext(ctx, "Validation failed: failed to retrieve existing to do item")
 		http.Error(writer, "validation failed: failed to retrieve existing to do item", http.StatusBadRequest)
 		return
 	}
 
-	err = activeRepo.UpdateItemTitleById(toDo.Title, toDo.Id)
+	err = activeRepo.UpdateItemTitleById(ctx, toDo.Title, toDo.Id)
 
 	if err != nil {
-		fmt.Println("Failed to update item:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("Failed to update item: %v ", err.Error()))
 		http.Error(writer, "failed to update to do item title", http.StatusBadRequest)
 		return
 	}
 
-	err = activeRepo.UpdateItemCompletionStatusById(toDo.IsComplete, toDo.Id)
+	err = activeRepo.UpdateItemCompletionStatusById(ctx, toDo.IsComplete, toDo.Id)
 
 	if err != nil {
-		fmt.Println("Failed to update item:", err)
+
+		slog.ErrorContext(ctx, fmt.Sprintf("Failed to update item: %v", err.Error()))
 		http.Error(writer, "failed to update to do item title", http.StatusInternalServerError)
 		return
 	}
 }
 
 func handlePATCHToggleComplete(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
 	requestIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
 
 	if err != nil {
-		fmt.Println("error converting activeId to int:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error converting activeId to int: %v", err.Error()))
 		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
-	requestItem, err := activeRepo.GetById(requestIdAsInt)
+	requestItem, err := activeRepo.GetById(ctx, requestIdAsInt)
 
 	if err != nil {
-		fmt.Println("Validation failed: failed to retrieve existing to do item")
+		slog.ErrorContext(ctx, "Validation failed: failed to retrieve existing to do item")
 		http.Error(writer, "validation failed: item must have title", http.StatusBadRequest)
 		return
 	}
 
-	err = activeRepo.UpdateItemCompletionStatusById(!requestItem.IsComplete, requestItem.Id)
+	err = activeRepo.UpdateItemCompletionStatusById(ctx, !requestItem.IsComplete, requestItem.Id)
 	if err != nil {
-		fmt.Println("failed to update item completion status")
+		slog.ErrorContext(ctx, fmt.Sprintf("failed to update item completion status: %v", err.Error()))
 		http.Error(writer, "failed to update item completion status", http.StatusInternalServerError)
 		return
 	}
@@ -156,19 +168,21 @@ func handlePATCHToggleComplete(writer http.ResponseWriter, request *http.Request
 }
 
 func handleDELETEToDoItem(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
 	activeIdAsInt, err := strconv.Atoi(request.PathValue("itemId"))
 
 	if err != nil {
-		fmt.Println("error converting activeId to int:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error converting activeId to int: %s", err.Error()))
 		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
-	err = activeRepo.DeleteItemById(activeIdAsInt)
+	err = activeRepo.DeleteItemById(ctx, activeIdAsInt)
 
 	if err != nil {
 
-		fmt.Println("error deleting item:", err.Error())
+		slog.ErrorContext(ctx, fmt.Sprintf("error deleting item: %s", err.Error()))
 
 		if errors.Is(err, pg.ErrNoRows) || errors.Is(err, inMemory.NotFoundError) {
 			http.Error(writer, "item not found", http.StatusNotFound)

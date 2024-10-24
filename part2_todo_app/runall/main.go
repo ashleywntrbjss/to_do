@@ -5,19 +5,24 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/api"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/ssr"
+	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	sharedStore := repo.InitRepo()
+	ctx := context.WithValue(context.Background(), "logger", logger)
 
-	go cliapp.RunCli(sharedStore)
-	go ssr.ListenAndServe(sharedStore)
-	go api.ListenAndServe(sharedStore)
+	sharedStore := repo.InitRepo(ctx)
+
+	go cliapp.RunCli(ctx, sharedStore)
+	go ssr.ListenAndServe(ctx, sharedStore)
+	go api.ListenAndServe(ctx, sharedStore)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
@@ -26,12 +31,12 @@ func main() {
 
 	go func() {
 		<-signalChan
-		fmt.Println("\nReceived an interrupt, performing cleanup...")
+		slog.InfoContext(ctx, "\nReceived an interrupt, performing cleanup...")
 		// Perform any cleanup here
 		doneChan <- true
 	}()
 
 	fmt.Println("Press Ctrl+C to exit")
 	<-doneChan
-	fmt.Println("Cleanup complete, exiting.")
+	slog.InfoContext(ctx, "Cleanup complete, exiting.")
 }

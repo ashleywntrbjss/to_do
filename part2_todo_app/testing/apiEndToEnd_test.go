@@ -5,6 +5,7 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/api"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -79,9 +80,11 @@ func makePutRequest(url string, data any) error {
 func TestStressApi(t *testing.T) {
 	var testStore = new(inMemory.InMemory)
 
+	ctx := context.Background()
+
 	testStore.InitTestData()
 
-	go api.ListenAndServe(testStore)
+	go api.ListenAndServe(ctx, testStore)
 
 	serverAddress := "http://" + api.ServerAddress
 

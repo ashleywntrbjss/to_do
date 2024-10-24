@@ -4,20 +4,21 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/inMemory"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo/sql"
 	"bjss.com/ashley.winter/to_do/part2_todo_app/todoitem"
+	"context"
 	"flag"
 )
 
 type Repo interface {
-	CreateItemFromTitle(title string) (todoitem.ToDoItem, error)
-	AddNew(item todoitem.ToDoItem) (int, error)
-	GetById(itemId int) (todoitem.ToDoItem, error)
-	GetAll() ([]todoitem.ToDoItem, error)
-	UpdateItemTitleById(title string, itemId int) error
-	UpdateItemCompletionStatusById(completionStatus bool, itemId int) error
-	DeleteItemById(itemId int) error
+	CreateItemFromTitle(ctx context.Context, title string) (todoitem.ToDoItem, error)
+	AddNew(ctx context.Context, item todoitem.ToDoItem) (int, error)
+	GetById(ctx context.Context, itemId int) (todoitem.ToDoItem, error)
+	GetAll(ctx context.Context) ([]todoitem.ToDoItem, error)
+	UpdateItemTitleById(ctx context.Context, title string, itemId int) error
+	UpdateItemCompletionStatusById(ctx context.Context, completionStatus bool, itemId int) error
+	DeleteItemById(ctx context.Context, itemId int) error
 }
 
-func InitRepo() Repo {
+func InitRepo(ctx context.Context) Repo {
 	var repoType string
 
 	var connectionString string
@@ -31,14 +32,16 @@ func InitRepo() Repo {
 
 	switch repoType {
 	case "memory":
-		sharedStore = new(inMemory.InMemory)
+		inMemoryStore := new(inMemory.InMemory)
+		sharedStore = inMemoryStore
+
 	case "sql":
 		if connectionString == "" {
 			panic("connectionString is required")
 		}
 
 		dbStore := new(sql.PostgresStore)
-		err := dbStore.InitDB(connectionString)
+		err := dbStore.InitDB(ctx, connectionString)
 		if err != nil {
 			panic(err.Error())
 		}

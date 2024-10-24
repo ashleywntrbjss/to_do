@@ -2,18 +2,21 @@ package ssr
 
 import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/repo"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var activeRepo repo.Repo
 
-func ListenAndServe(repo repo.Repo) {
+func ListenAndServe(ctx context.Context, repo repo.Repo) {
 	mux := http.NewServeMux()
 
 	activeRepo = repo
@@ -26,30 +29,35 @@ func ListenAndServe(repo repo.Repo) {
 	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)
 	mux.HandleFunc("GET /", handleGETHomePage)
 
-	fmt.Println("Starting template server at http://localhost:8080")
-	err := http.ListenAndServe("localhost:8080", middleware(mux))
+	slog.InfoContext(ctx, "Starting template server at http://localhost:8080")
+	err := http.ListenAndServe("localhost:8080", middleware(ctx, mux))
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
 	}
 }
 
-func middleware(existingHandler http.Handler) http.Handler {
+func middleware(ctx context.Context, existingHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println(request.Method, request.URL.Path)
+		handlerCtx := context.WithValue(request.Context(), "logger", ctx.Value("logger"))
+		handlerCtx, cancel := context.WithTimeout(handlerCtx, 5*time.Second)
+		defer cancel()
+
+		request = request.WithContext(handlerCtx)
+
+		slog.InfoContext(ctx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
 		existingHandler.ServeHTTP(writer, request)
 	})
 }
 
-func getTemplateAndExecute(filename string, writer http.ResponseWriter, data any) {
-
+func getTemplateAndExecute(ctx context.Context, filename string, writer http.ResponseWriter, data any) {
 	activeTemplate, err := templateBuilder(filename)
 	if err != nil {
-		fmt.Println("error getting template", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error getting template: %v", err))
 		http.Error(writer, "internal Server Error, see logs for details", http.StatusInternalServerError)
 		return
 	}
 
-	executeTemplate(activeTemplate, writer, data)
+	executeTemplate(ctx, activeTemplate, writer, data)
 }
 
 func templateBuilder(filename string) (template.Template, error) {
@@ -77,11 +85,11 @@ func templateBuilder(filename string) (template.Template, error) {
 	return *activeTemplate, nil
 }
 
-func executeTemplate(template template.Template, writer http.ResponseWriter, data any) {
+func executeTemplate(ctx context.Context, template template.Template, writer http.ResponseWriter, data any) {
 	err := template.ExecuteTemplate(writer, "base", data)
 
 	if err != nil {
-		fmt.Println("error executing template:", err)
+		slog.ErrorContext(ctx, fmt.Sprintf("error executing template: %v", err))
 		http.Error(writer, "internal server error, see logs for details", http.StatusInternalServerError)
 		return
 	}
