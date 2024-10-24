@@ -69,7 +69,7 @@ func (r *PostgresStore) GetById(ctx context.Context, itemId int) (todoitem.ToDoI
 	if err != nil {
 		return todoitem.ToDoItem{}, err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Found item by id: %v", item))
+	slog.InfoContext(ctx, fmt.Sprintf("Found item by id: %v", itemId))
 	return item, nil
 }
 
