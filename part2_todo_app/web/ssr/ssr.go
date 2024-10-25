@@ -17,6 +17,10 @@ import (
 var activeRepo repo.Repo
 
 func ListenAndServe(ctx context.Context, repo repo.Repo) {
+	if ctx.Value("logger") == nil {
+		log.Fatal("No logger in context")
+	}
+
 	mux := http.NewServeMux()
 
 	activeRepo = repo

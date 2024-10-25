@@ -54,7 +54,7 @@ func main() {
 
 	go func() {
 		<-signalChan
-		newLogger.InfoContext(ctx, "\nReceived an interrupt, performing cleanup...")
+		newLogger.InfoContext(ctx, "\nReceived an interrupt")
 		// Perform any cleanup here
 		doneChan <- true
 	}()
