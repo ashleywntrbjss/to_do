@@ -16,7 +16,7 @@ type PostgresStore struct {
 func (r *PostgresStore) InitDB(ctx context.Context, connectionString string) error {
 	opt, err := pg.ParseURL(connectionString)
 	if err != nil {
-		slog.ErrorContext(ctx, err.Error())
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, err.Error())
 		return err
 	}
 
@@ -24,10 +24,10 @@ func (r *PostgresStore) InitDB(ctx context.Context, connectionString string) err
 
 	err = createSchema(r.db)
 	if err != nil {
-		slog.ErrorContext(ctx, err.Error())
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, err.Error())
 		return err
 	}
-	slog.InfoContext(ctx, "Postgres db initialised")
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, "Postgres db initialised")
 	return nil
 }
 
@@ -51,7 +51,7 @@ func (r *PostgresStore) CreateItemFromTitle(ctx context.Context, title string) (
 	if err != nil {
 		return todoitem.ToDoItem{}, err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Added item, rows affected: %v", result.RowsAffected()))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Added item, rows affected: %v", result.RowsAffected()))
 	return newItem, nil
 }
 
@@ -60,7 +60,7 @@ func (r *PostgresStore) AddNew(ctx context.Context, item todoitem.ToDoItem) (int
 	if err != nil {
 		return -1, err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Added item, rows affected: %v", result.RowsAffected()))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Added item, rows affected: %v", result.RowsAffected()))
 	return item.Id, nil
 }
 func (r *PostgresStore) GetById(ctx context.Context, itemId int) (todoitem.ToDoItem, error) {
@@ -69,7 +69,7 @@ func (r *PostgresStore) GetById(ctx context.Context, itemId int) (todoitem.ToDoI
 	if err != nil {
 		return todoitem.ToDoItem{}, err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Found item by id: %v", itemId))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Found item by id: %v", itemId))
 	return item, nil
 }
 
@@ -79,7 +79,7 @@ func (r *PostgresStore) GetAll(ctx context.Context) ([]todoitem.ToDoItem, error)
 	if err != nil {
 		return nil, err
 	}
-	slog.InfoContext(ctx, "Finding all items")
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, "Finding all items")
 	return items, nil
 }
 
@@ -88,7 +88,7 @@ func (r *PostgresStore) UpdateItemTitleById(ctx context.Context, newTitle string
 	if err != nil {
 		return err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Updating item title, rows affected: %v", result.RowsAffected()))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Updating item title, rows affected: %v", result.RowsAffected()))
 	return nil
 }
 
@@ -98,7 +98,7 @@ func (r *PostgresStore) UpdateItemCompletionStatusById(ctx context.Context, comp
 		return err
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("Updating item completion status, rows affected: %v", result.RowsAffected()))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Updating item completion status, rows affected: %v", result.RowsAffected()))
 	return err
 }
 
@@ -107,6 +107,6 @@ func (r *PostgresStore) DeleteItemById(ctx context.Context, itemId int) error {
 	if err != nil {
 		return err
 	}
-	slog.InfoContext(ctx, fmt.Sprintf("Deleting item, rows affected: %v", result.RowsAffected()))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Deleting item, rows affected: %v", result.RowsAffected()))
 	return err
 }

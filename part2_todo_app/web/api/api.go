@@ -36,11 +36,11 @@ func ListenAndServe(ctx context.Context, repo repo.Repo) {
 	mux.HandleFunc("PATCH /api/toggle-complete/{itemId}", handlePATCHToggleComplete)
 	mux.HandleFunc("DELETE /api/delete/{itemId}", handleDELETEToDoItem)
 
-	slog.InfoContext(ctx, fmt.Sprintf("Server listening on %s%s", ServerProtocol, ServerAddress))
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("Server listening on %s%s", ServerProtocol, ServerAddress))
 
 	err := http.ListenAndServe(ServerAddress, middleware(ctx, mux))
 	if err != nil {
-		slog.ErrorContext(ctx, fmt.Sprintf("There's an error with the server: %s", err.Error()))
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, fmt.Sprintf("There's an error with the server: %s", err.Error()))
 	}
 }
 
@@ -49,6 +49,7 @@ func middleware(ctx context.Context, existingHandler http.Handler) http.Handler 
 		requestId := generateRequestID()
 
 		handlerCtx := context.WithValue(request.Context(), "requestId", requestId)
+		handlerCtx = context.WithValue(handlerCtx, "server", "api")
 		handlerCtx = context.WithValue(handlerCtx, "logger", ctx.Value("logger"))
 		handlerCtx, cancel := context.WithTimeout(handlerCtx, 5*time.Second)
 		defer cancel()
@@ -64,7 +65,7 @@ func middleware(ctx context.Context, existingHandler http.Handler) http.Handler 
 			return
 		}
 
-		slog.InfoContext(handlerCtx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
+		ctx.Value("logger").(*slog.Logger).InfoContext(handlerCtx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
 
 		existingHandler.ServeHTTP(writer, request)
 	})
@@ -73,7 +74,7 @@ func middleware(ctx context.Context, existingHandler http.Handler) http.Handler 
 func encodeJson(ctx context.Context, writer http.ResponseWriter, data any) {
 	writer.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(writer).Encode(data); err != nil {
-		slog.ErrorContext(ctx, fmt.Sprintf("error encoding json: %s", err.Error()))
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, fmt.Sprintf("error encoding json: %s", err.Error()))
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }

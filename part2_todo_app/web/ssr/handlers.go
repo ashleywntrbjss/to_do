@@ -20,14 +20,14 @@ func handleGETViewToDoItemPage(writer http.ResponseWriter, request *http.Request
 	activeIdAsInt, err := strconv.Atoi(activeId)
 
 	if err != nil {
-		slog.ErrorContext(ctx, "invalid item id format in request: %v", err.Error())
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, "invalid item id format in request: %v", err.Error())
 		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
 	activeItem, err := activeRepo.GetById(ctx, activeIdAsInt)
 	if err != nil {
-		slog.WarnContext(ctx, "unable to find requested item: %v", err.Error())
+		ctx.Value("logger").(*slog.Logger).WarnContext(ctx, "unable to find requested item: %v", err.Error())
 		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
 	}
@@ -40,7 +40,7 @@ func handleGETViewAllToDoItemsPage(writer http.ResponseWriter, request *http.Req
 
 	items, err := activeRepo.GetAll(ctx)
 	if err != nil {
-		slog.WarnContext(ctx, "items not found: %v", err.Error())
+		ctx.Value("logger").(*slog.Logger).WarnContext(ctx, "items not found: %v", err.Error())
 		http.Error(writer, "items not found", http.StatusNotFound)
 		return
 	}
@@ -59,14 +59,14 @@ func handleGETEditToDoItemPage(writer http.ResponseWriter, request *http.Request
 	activeIdAsInt, err := strconv.Atoi(activeId)
 
 	if err != nil {
-		slog.ErrorContext(ctx, "invalid item id format in request: %v", err.Error())
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, "invalid item id format in request: %v", err.Error())
 		http.Error(writer, "invalid itemId format", http.StatusBadRequest)
 		return
 	}
 
 	activeItem, err := activeRepo.GetById(ctx, activeIdAsInt)
 	if err != nil {
-		slog.WarnContext(ctx, fmt.Sprintf("item id not found: %v", err.Error()))
+		ctx.Value("logger").(*slog.Logger).WarnContext(ctx, fmt.Sprintf("item id not found: %v", err.Error()))
 		http.Error(writer, "itemId not found", http.StatusNotFound)
 		return
 	}

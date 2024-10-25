@@ -29,7 +29,7 @@ func ListenAndServe(ctx context.Context, repo repo.Repo) {
 	mux.HandleFunc("GET /favicon.ico", handleGETFavicon)
 	mux.HandleFunc("GET /", handleGETHomePage)
 
-	slog.InfoContext(ctx, "Starting template server at http://localhost:8080")
+	ctx.Value("logger").(*slog.Logger).InfoContext(ctx, "Starting template server at http://localhost:8080")
 	err := http.ListenAndServe("localhost:8080", middleware(ctx, mux))
 	if err != nil {
 		log.Fatalln("there's an error with the server:", err)
@@ -39,12 +39,13 @@ func ListenAndServe(ctx context.Context, repo repo.Repo) {
 func middleware(ctx context.Context, existingHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		handlerCtx := context.WithValue(request.Context(), "logger", ctx.Value("logger"))
+		handlerCtx = context.WithValue(handlerCtx, "server", "template")
 		handlerCtx, cancel := context.WithTimeout(handlerCtx, 5*time.Second)
 		defer cancel()
 
 		request = request.WithContext(handlerCtx)
 
-		slog.InfoContext(ctx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
+		ctx.Value("logger").(*slog.Logger).InfoContext(ctx, fmt.Sprintf("%v - %v", request.Method, request.URL.Path))
 		existingHandler.ServeHTTP(writer, request)
 	})
 }
@@ -52,7 +53,7 @@ func middleware(ctx context.Context, existingHandler http.Handler) http.Handler 
 func getTemplateAndExecute(ctx context.Context, filename string, writer http.ResponseWriter, data any) {
 	activeTemplate, err := templateBuilder(filename)
 	if err != nil {
-		slog.ErrorContext(ctx, fmt.Sprintf("error getting template: %v", err))
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, fmt.Sprintf("error getting template: %v", err))
 		http.Error(writer, "internal Server Error, see logs for details", http.StatusInternalServerError)
 		return
 	}
@@ -89,7 +90,7 @@ func executeTemplate(ctx context.Context, template template.Template, writer htt
 	err := template.ExecuteTemplate(writer, "base", data)
 
 	if err != nil {
-		slog.ErrorContext(ctx, fmt.Sprintf("error executing template: %v", err))
+		ctx.Value("logger").(*slog.Logger).ErrorContext(ctx, fmt.Sprintf("error executing template: %v", err))
 		http.Error(writer, "internal server error, see logs for details", http.StatusInternalServerError)
 		return
 	}

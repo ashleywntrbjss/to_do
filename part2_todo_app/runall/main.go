@@ -7,18 +7,41 @@ import (
 	"bjss.com/ashley.winter/to_do/part2_todo_app/web/ssr"
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+type CustomHandler struct {
+	slog.Handler
+}
 
-	ctx := context.WithValue(context.Background(), "logger", logger)
+func (h *CustomHandler) Handle(ctx context.Context, r slog.Record) error {
+	if value := ctx.Value("requestId"); value != nil {
+		r.AddAttrs(slog.String("requestId", ctx.Value("requestId").(string)))
+	}
+	if value := ctx.Value("server"); value != nil {
+		r.AddAttrs(slog.String("server", value.(string)))
+	}
+	return h.Handler.Handle(ctx, r)
+}
+
+func main() {
+	baseLogger := slog.NewJSONHandler(os.Stdout, nil)
+
+	customLoggerHandler := &CustomHandler{Handler: baseLogger}
+
+	newLogger := slog.New(customLoggerHandler)
+
+	ctx := context.WithValue(context.Background(), "logger", newLogger)
 
 	sharedStore := repo.InitRepo(ctx)
+
+	if ctx.Value("logger") == nil {
+		log.Fatal("No logger in context")
+	}
 
 	go cliapp.RunCli(ctx, sharedStore)
 	go ssr.ListenAndServe(ctx, sharedStore)
@@ -31,12 +54,12 @@ func main() {
 
 	go func() {
 		<-signalChan
-		slog.InfoContext(ctx, "\nReceived an interrupt, performing cleanup...")
+		newLogger.InfoContext(ctx, "\nReceived an interrupt, performing cleanup...")
 		// Perform any cleanup here
 		doneChan <- true
 	}()
 
 	fmt.Println("Press Ctrl+C to exit")
 	<-doneChan
-	slog.InfoContext(ctx, "Cleanup complete, exiting.")
+	newLogger.InfoContext(ctx, "Exiting.")
 }
